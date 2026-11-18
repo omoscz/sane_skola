@@ -219,20 +219,21 @@ def spust_cestinu():
     sub = cestina.SUBMODULY[sub_nazev]
 
     skupiny = None
-    if sub == "vyj":
-        skupiny = st.multiselect("Skupiny (podle písmene)", cestina.VYJMENOVANA_SKUPINY,
-                                 default=cestina.VYJMENOVANA_SKUPINY, key="cj_skupiny")
+    if sub == "diktat":
+        skupiny = st.multiselect("Skupiny (podle písmene)", cestina.DIKTATY_SKUPINY,
+                                 default=cestina.DIKTATY_SKUPINY, key="cj_skupiny")
 
-    pocet = st.slider("Počet příkladů", min_value=1, max_value=20, value=8, key="cj_pocet")
+    pocet_label = "Počet vět" if sub == "diktat" else "Počet příkladů"
+    pocet = st.slider(pocet_label, min_value=1, max_value=20, value=8, key="cj_pocet")
 
     if st.button("🎲 Vygenerovat", type="primary", key="cj_gen"):
-        if sub == "vyj" and not skupiny:
+        if sub == "diktat" and not skupiny:
             st.warning("Vyber aspoň jednu skupinu písmen.")
         else:
             tid = st.session_state.get("cj_testid", 0) + 1
             st.session_state["cj_testid"] = tid
-            if sub == "vyj":
-                pol = cestina.vyj_vygeneruj(skupiny, pocet)
+            if sub == "diktat":
+                pol = cestina.diktat_vygeneruj(skupiny, pocet)
             elif sub == "pady":
                 pol = cestina.pady_vygeneruj(pocet)
             elif sub == "kat":
@@ -250,10 +251,13 @@ def spust_cestinu():
     st.write("---")
 
     for i, p in enumerate(test["polozky"]):
-        if p["typ"] == "vyj":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;Doplň: {p['zadani']}")
-            st.radio("odpověď", ["i", "í", "y", "ý"], index=None, horizontal=True,
-                     key=f"cj_{tid}_{i}", label_visibility="collapsed")
+        if p["typ"] == "diktat":
+            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['text']}", "1.3rem")
+            cols = st.columns(len(p["odp"]))
+            for j in range(len(p["odp"])):
+                with cols[j]:
+                    st.radio(f"{j + 1}. mezera", ["i", "í", "y", "ý"], index=None,
+                             key=f"cj_{tid}_{i}_b{j}")
         elif p["typ"] == "pad":
             st.markdown(f"**{i + 1}.** {p['zadani']}")
             st.text_input("odpověď", key=f"cj_{tid}_{i}", label_visibility="collapsed")
@@ -279,52 +283,63 @@ def spust_cestinu():
         return
 
     st.write("---")
-    skore = 0
+    ziskano = 0
+    maximum = 0
     chyby = []
     for i, p in enumerate(test["polozky"]):
-        if p["typ"] == "vyj":
-            moje = st.session_state.get(f"cj_{tid}_{i}")
-            ok = (moje == p["odp"])
-            zadani = f"{p['zadani']} ({p['slovo']})"
-            moje_str = moje or "—"
-            spravne_str = f"{p['odp']} → {p['slovo']}"
-        elif p["typ"] == "stavba":
-            moje = st.session_state.get(f"cj_{tid}_{i}")
-            ok = (moje == p["odp"])
-            zadani = f"část slova „{p['slovo']}“"
-            moje_str = moje or "—"
-            spravne_str = p["odp"]
-        elif p["typ"] == "pad":
-            moje = (st.session_state.get(f"cj_{tid}_{i}") or "").strip()
-            ok = (moje.lower() == p["odp"].lower())
-            zadani = p["zadani"]
-            moje_str = moje or "—"
-            spravne_str = p["odp"]
-        else:  # kat
-            mr = st.session_state.get(f"cj_{tid}_{i}_rod")
-            mc = st.session_state.get(f"cj_{tid}_{i}_cislo")
-            mp_ = st.session_state.get(f"cj_{tid}_{i}_pad")
-            ok = (ROD_MAP.get(mr) == p["rod"] and CISLO_MAP.get(mc) == p["cislo"] and mp_ == str(p["pad"]))
-            zadani = f"„{p['slovo']}“ — rod/číslo/pád"
-            moje_str = f"{mr or '—'} / {mc or '—'} / {mp_ or '—'}"
-            spravne_str = f"{ROD_NAZEV[p['rod']]} / {CISLO_NAZEV[p['cislo']]} / {p['pad']}."
+        if p["typ"] == "diktat":
+            spravne_blanky = 0
+            moje_pismena = []
+            for j, spravne_p in enumerate(p["odp"]):
+                moje_p = st.session_state.get(f"cj_{tid}_{i}_b{j}")
+                moje_pismena.append(moje_p or "_")
+                if moje_p == spravne_p:
+                    spravne_blanky += 1
+            maximum += len(p["odp"])
+            ziskano += spravne_blanky
+            ok = (spravne_blanky == len(p["odp"]))
+            zadani = p["text"]
+            moje_str = cestina._vypln(p["text"], moje_pismena) if "_" not in moje_pismena else " / ".join(moje_pismena)
+            spravne_str = p["plny"]
+        else:
+            maximum += 1
+            if p["typ"] == "stavba":
+                moje = st.session_state.get(f"cj_{tid}_{i}")
+                ok = (moje == p["odp"])
+                zadani = f"část slova „{p['slovo']}“"
+                moje_str = moje or "—"
+                spravne_str = p["odp"]
+            elif p["typ"] == "pad":
+                moje = (st.session_state.get(f"cj_{tid}_{i}") or "").strip()
+                ok = (moje.lower() == p["odp"].lower())
+                zadani = p["zadani"]
+                moje_str = moje or "—"
+                spravne_str = p["odp"]
+            else:  # kat
+                mr = st.session_state.get(f"cj_{tid}_{i}_rod")
+                mc = st.session_state.get(f"cj_{tid}_{i}_cislo")
+                mp_ = st.session_state.get(f"cj_{tid}_{i}_pad")
+                ok = (ROD_MAP.get(mr) == p["rod"] and CISLO_MAP.get(mc) == p["cislo"] and mp_ == str(p["pad"]))
+                zadani = f"„{p['slovo']}“ — rod/číslo/pád"
+                moje_str = f"{mr or '—'} / {mc or '—'} / {mp_ or '—'}"
+                spravne_str = f"{ROD_NAZEV[p['rod']]} / {CISLO_NAZEV[p['cislo']]} / {p['pad']}."
+            if ok:
+                ziskano += 1
 
         if ok:
-            skore += 1
             st.markdown(f"✅ **{i + 1}.** {zadani}  →  {spravne_str}")
         else:
             st.markdown(f"❌ **{i + 1}.** {zadani}  →  tvoje: {moje_str} · správně: **{spravne_str}**")
             chyby.append((zadani, moje_str, spravne_str))
 
-    pocet_c = len(test["polozky"])
     st.write("---")
-    velky_text(f"Skóre: {skore} / {pocet_c}", "1.6rem")
-    if skore == pocet_c:
+    velky_text(f"Skóre: {ziskano} / {maximum}", "1.6rem")
+    if maximum and ziskano == maximum:
         st.balloons()
         st.success("🎉 Všechno správně! Výborně!")
 
     st.write("---")
-    whatsapp_odkazy("Sára", test["sub_nazev"], skore, pocet_c, chyby)
+    whatsapp_odkazy("Sára", test["sub_nazev"], ziskano, maximum, chyby)
 
 
 # --- UI ---

@@ -304,6 +304,84 @@ CASTI_LABEL = {"predpona": "předpona", "koren": "kořen", "pripona": "přípona
 
 
 # ============================================================
+# 5) SLOVNÍ DRUHY — najdi podstatná jména a slovesa ve větě
+#    Každá položka: věta + seznam podstatných jmen + seznam sloves
+#    (slova se uvádějí přesně v tom tvaru, jak jsou ve větě).
+# ============================================================
+DRUHY = [
+    {"veta": "Pavel čte zajímavou knihu.", "podst": ["Pavel", "knihu"], "slovesa": ["čte"]},
+    {"veta": "Maminka vaří voňavou polévku.", "podst": ["Maminka", "polévku"], "slovesa": ["vaří"]},
+    {"veta": "Na louce kvetou žluté květiny.", "podst": ["louce", "květiny"], "slovesa": ["kvetou"]},
+    {"veta": "Děti staví hrad z písku.", "podst": ["Děti", "hrad", "písku"], "slovesa": ["staví"]},
+    {"veta": "Pes hlídá velký dům.", "podst": ["Pes", "dům"], "slovesa": ["hlídá"]},
+    {"veta": "Ptáci zpívají v lese.", "podst": ["Ptáci", "lese"], "slovesa": ["zpívají"]},
+    {"veta": "Teta koupila čerstvý chléb.", "podst": ["Teta", "chléb"], "slovesa": ["koupila"]},
+    {"veta": "Slunce svítí nad horami.", "podst": ["Slunce", "horami"], "slovesa": ["svítí"]},
+    {"veta": "Žáci píší těžký test.", "podst": ["Žáci", "test"], "slovesa": ["píší"]},
+    {"veta": "Honza otevřel okno a zavřel dveře.", "podst": ["Honza", "okno", "dveře"], "slovesa": ["otevřel", "zavřel"]},
+    {"veta": "Kočka spí na měkké pohovce.", "podst": ["Kočka", "pohovce"], "slovesa": ["spí"]},
+    {"veta": "Tatínek opravuje staré auto.", "podst": ["Tatínek", "auto"], "slovesa": ["opravuje"]},
+    {"veta": "Babička plete teplý svetr.", "podst": ["Babička", "svetr"], "slovesa": ["plete"]},
+    {"veta": "Letadlo přistálo na letišti.", "podst": ["Letadlo", "letišti"], "slovesa": ["přistálo"]},
+    {"veta": "Rybáři chytají velké ryby.", "podst": ["Rybáři", "ryby"], "slovesa": ["chytají"]},
+    {"veta": "Včely sbírají sladký med.", "podst": ["Včely", "med"], "slovesa": ["sbírají"]},
+    {"veta": "Zahradník sází mladé stromky.", "podst": ["Zahradník", "stromky"], "slovesa": ["sází"]},
+    {"veta": "Vítr lámal silné větve.", "podst": ["Vítr", "větve"], "slovesa": ["lámal"]},
+    {"veta": "Myslivec pozoroval plachou srnu.", "podst": ["Myslivec", "srnu"], "slovesa": ["pozoroval"]},
+    {"veta": "Kuchař krájel čerstvou zeleninu.", "podst": ["Kuchař", "zeleninu"], "slovesa": ["krájel"]},
+    {"veta": "Malíř maloval barevný obraz.", "podst": ["Malíř", "obraz"], "slovesa": ["maloval"]},
+    {"veta": "Hasiči hasili velký požár.", "podst": ["Hasiči", "požár"], "slovesa": ["hasili"]},
+    {"veta": "Lékař vyšetřil nemocného pacienta.", "podst": ["Lékař", "pacienta"], "slovesa": ["vyšetřil"]},
+    {"veta": "Řidič zastavil červené auto.", "podst": ["Řidič", "auto"], "slovesa": ["zastavil"]},
+    {"veta": "Děvčata trhala voňavé jahody.", "podst": ["Děvčata", "jahody"], "slovesa": ["trhala"]},
+    {"veta": "Chlapci kopali do míče.", "podst": ["Chlapci", "míče"], "slovesa": ["kopali"]},
+    {"veta": "Sova lovila malou myš.", "podst": ["Sova", "myš"], "slovesa": ["lovila"]},
+    {"veta": "Král vládl mocné zemi.", "podst": ["Král", "zemi"], "slovesa": ["vládl"]},
+    {"veta": "Princezna ztratila zlatý prsten.", "podst": ["Princezna", "prsten"], "slovesa": ["ztratila"]},
+    {"veta": "Vlak projel dlouhým tunelem.", "podst": ["Vlak", "tunelem"], "slovesa": ["projel"]},
+    {"veta": "Námořník řídil starou loď.", "podst": ["Námořník", "loď"], "slovesa": ["řídil"]},
+    {"veta": "Farmář krmil hladová prasata.", "podst": ["Farmář", "prasata"], "slovesa": ["krmil"]},
+    {"veta": "Pekař upekl křupavé rohlíky.", "podst": ["Pekař", "rohlíky"], "slovesa": ["upekl"]},
+    {"veta": "Učitelka vysvětlila novou látku.", "podst": ["Učitelka", "látku"], "slovesa": ["vysvětlila"]},
+    {"veta": "Dědeček štípal suché dříví.", "podst": ["Dědeček", "dříví"], "slovesa": ["štípal"]},
+    {"veta": "Veverka schovala chutný oříšek.", "podst": ["Veverka", "oříšek"], "slovesa": ["schovala"]},
+    {"veta": "Bouře zničila starou stodolu.", "podst": ["Bouře", "stodolu"], "slovesa": ["zničila"]},
+    {"veta": "Horolezec zdolal vysokou horu.", "podst": ["Horolezec", "horu"], "slovesa": ["zdolal"]},
+    {"veta": "Klaun rozesmál malé diváky.", "podst": ["Klaun", "diváky"], "slovesa": ["rozesmál"]},
+    {"veta": "Zedník stavěl pevnou zeď.", "podst": ["Zedník", "zeď"], "slovesa": ["stavěl"]},
+    {"veta": "Krejčí ušil nový kabát.", "podst": ["Krejčí", "kabát"], "slovesa": ["ušil"]},
+    {"veta": "Holčička hladila huňatého psa.", "podst": ["Holčička", "psa"], "slovesa": ["hladila"]},
+    {"veta": "Žáby skákaly do rybníka.", "podst": ["Žáby", "rybníka"], "slovesa": ["skákaly"]},
+    {"veta": "Slon stříkal vodu chobotem.", "podst": ["Slon", "vodu", "chobotem"], "slovesa": ["stříkal"]},
+    {"veta": "Kapitán vedl statečnou posádku.", "podst": ["Kapitán", "posádku"], "slovesa": ["vedl"]},
+    {"veta": "Zloděj ukradl drahý šperk.", "podst": ["Zloděj", "šperk"], "slovesa": ["ukradl"]},
+    {"veta": "Policista chytil nebezpečného zloděje.", "podst": ["Policista", "zloděje"], "slovesa": ["chytil"]},
+    {"veta": "Čáp postavil velké hnízdo.", "podst": ["Čáp", "hnízdo"], "slovesa": ["postavil"]},
+    {"veta": "Vlak zastavil na nádraží.", "podst": ["Vlak", "nádraží"], "slovesa": ["zastavil"]},
+    {"veta": "Maminka zalévala suché kytky.", "podst": ["Maminka", "kytky"], "slovesa": ["zalévala"]},
+    {"veta": "Tatínek sekal vysokou trávu.", "podst": ["Tatínek", "trávu"], "slovesa": ["sekal"]},
+    {"veta": "Chlapec pouštěl barevného draka.", "podst": ["Chlapec", "draka"], "slovesa": ["pouštěl"]},
+    {"veta": "Kovář koval ostrý meč.", "podst": ["Kovář", "meč"], "slovesa": ["koval"]},
+    {"veta": "Opice šplhala po stromě.", "podst": ["Opice", "stromě"], "slovesa": ["šplhala"]},
+    {"veta": "Děti lepily barevné papíry.", "podst": ["Děti", "papíry"], "slovesa": ["lepily"]},
+    {"veta": "Medvěd hledal zralé maliny.", "podst": ["Medvěd", "maliny"], "slovesa": ["hledal"]},
+    {"veta": "Rytíř bojoval s drakem.", "podst": ["Rytíř", "drakem"], "slovesa": ["bojoval"]},
+    {"veta": "Hudebník hrál smutnou píseň.", "podst": ["Hudebník", "píseň"], "slovesa": ["hrál"]},
+    {"veta": "Pošťák roznášel ranní poštu.", "podst": ["Pošťák", "poštu"], "slovesa": ["roznášel"]},
+    {"veta": "Kočka chytila myš a snědla ji.", "podst": ["Kočka", "myš"], "slovesa": ["chytila", "snědla"]},
+    {"veta": "Pavel napsal dopis a poslal ho.", "podst": ["Pavel", "dopis"], "slovesa": ["napsal", "poslal"]},
+    {"veta": "Petr zavřel knihu a usnul.", "podst": ["Petr", "knihu"], "slovesa": ["zavřel", "usnul"]},
+    {"veta": "Děti nakreslily obrázek a ukázaly ho.", "podst": ["Děti", "obrázek"], "slovesa": ["nakreslily", "ukázaly"]},
+    {"veta": "Maminka umyla nádobí a uklidila kuchyň.", "podst": ["Maminka", "nádobí", "kuchyň"], "slovesa": ["umyla", "uklidila"]},
+    {"veta": "Zahrada je plná růží.", "podst": ["Zahrada", "růží"], "slovesa": ["je"]},
+    {"veta": "Na obloze svítí jasné hvězdy.", "podst": ["obloze", "hvězdy"], "slovesa": ["svítí"]},
+    {"veta": "Traktor oral velké pole.", "podst": ["Traktor", "pole"], "slovesa": ["oral"]},
+    {"veta": "Žirafa okusovala zelené listí.", "podst": ["Žirafa", "listí"], "slovesa": ["okusovala"]},
+    {"veta": "Chlapci postavili sněhovou pevnost.", "podst": ["Chlapci", "pevnost"], "slovesa": ["postavili"]},
+]
+
+
+# ============================================================
 # Generátory
 # ============================================================
 
@@ -366,9 +444,36 @@ def stavba_vygeneruj(pocet):
              "koren": s["koren"], "pripona": s["pripona"]} for s in vyber]
 
 
+def _tokenizuj(veta):
+    # rozdělí větu na slova a odstraní interpunkci na okrajích
+    tokeny = []
+    for kus in veta.split():
+        slovo = kus.strip(".,!?;:„“\"'()")
+        if slovo:
+            tokeny.append(slovo)
+    return tokeny
+
+
+def druhy_vygeneruj(pocet):
+    zasoba = DRUHY[:]
+    random.shuffle(zasoba)
+    vyber = zasoba[:pocet] if pocet <= len(zasoba) else [random.choice(DRUHY) for _ in range(pocet)]
+    polozky = []
+    for d in vyber:
+        polozky.append({
+            "typ": "druhy",
+            "veta": d["veta"],
+            "slova": _tokenizuj(d["veta"]),
+            "podst": d["podst"],
+            "slovesa": d["slovesa"],
+        })
+    return polozky
+
+
 SUBMODULY = {
     "Diktát (vyjmenovaná slova)": "diktat",
     "Pády": "pady",
     "Mluvnické kategorie": "kat",
     "Stavba slova": "stavba",
+    "Podstatná jména a slovesa": "druhy",
 }

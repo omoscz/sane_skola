@@ -254,12 +254,11 @@ def spust_cestinu():
         if p["typ"] == "diktat":
             velky_text(f"{i + 1}.&nbsp;&nbsp;{p['text']}", "1.3rem")
             pocet_mezer = len(p["odp"])
-            vis = "visible" if pocet_mezer > 1 else "collapsed"
             cols = st.columns(pocet_mezer)
             for j in range(pocet_mezer):
                 with cols[j]:
-                    st.radio(f"{j + 1}. mezera", ["i", "í", "y", "ý"], index=None,
-                             key=f"cj_{tid}_{i}_b{j}", label_visibility=vis)
+                    st.radio(f"mezera {j + 1}", ["i", "í", "y", "ý"], index=None,
+                             key=f"cj_{tid}_{i}_b{j}", label_visibility="collapsed")
         elif p["typ"] == "pad":
             st.markdown(f"**{i + 1}.** {p['zadani']}")
             st.text_input("odpověď", key=f"cj_{tid}_{i}", label_visibility="collapsed")

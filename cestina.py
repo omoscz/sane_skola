@@ -2,95 +2,87 @@
 import random
 
 # ============================================================
-# 1) VYJMENOVANÁ SLOVA — doplň i/í/y/ý
-#    Každá položka: z = zadání s mezerou, o = správné písmeno, s = celé slovo
-#    Skupiny mají vyvážený poměr tvrdého (y/ý) a měkkého (i/í).
+# 1) DIKTÁT — věty s vyjmenovanými slovy, doplň i/í/y/ý
+#    Vyjmenovaná slova se píšou po B, L, M, P, S, V, Z.
+#    Každá položka: (věta s mezerami "_", seznam správných písmen v pořadí)
 # ============================================================
-VYJMENOVANA = {
+DIKTATY = {
     "B": [
-        {"z": "b_t", "o": "ý", "s": "být"},
-        {"z": "náb_tek", "o": "y", "s": "nábytek"},
-        {"z": "b_strý", "o": "y", "s": "bystrý"},
-        {"z": "kob_la", "o": "y", "s": "kobyla"},
-        {"z": "b_č", "o": "i", "s": "bič"},
-        {"z": "b_lý", "o": "í", "s": "bílý"},
-        {"z": "b_tva", "o": "i", "s": "bitva"},
-        {"z": "nab_dka", "o": "í", "s": "nabídka"},
-    ],
-    "F": [
-        {"z": "f_zika", "o": "y", "s": "fyzika"},
-        {"z": "f_zik", "o": "y", "s": "fyzik"},
-        {"z": "f_lm", "o": "i", "s": "film"},
-        {"z": "f_alka", "o": "i", "s": "fialka"},
+        ("B_l jednou jeden starý ml_nář.", ["y", "ý"]),
+        ("Musíš b_t do večera doma.", ["ý"]),
+        ("Na dvoře stála hubená kob_la.", ["y"]),
+        ("Náb_tek v ob_váku je nový.", ["y", "ý"]),
+        ("B_strý chlapec b_dlí u lesa.", ["y", "y"]),
+        ("Na louce se pásl velký b_k.", ["ý"]),
+        ("Chlapec dostal b_lý b_č.", ["í", "i"]),
+        ("To b_lo úplně ob_čejné ráno.", ["y", "y"]),
     ],
     "L": [
-        {"z": "sl_šet", "o": "y", "s": "slyšet"},
-        {"z": "ml_n", "o": "ý", "s": "mlýn"},
-        {"z": "pl_n", "o": "y", "s": "plyn"},
-        {"z": "l_ko", "o": "ý", "s": "lýko"},
-        {"z": "l_ška", "o": "i", "s": "liška"},
-        {"z": "l_st", "o": "i", "s": "list"},
-        {"z": "l_pa", "o": "í", "s": "lípa"},
-        {"z": "kl_d", "o": "i", "s": "klid"},
+        ("Z dálky jsme sl_šeli hrom.", ["y"]),
+        ("Starý ml_n stál u řeky.", ["ý"]),
+        ("Na nebi se bl_skalo.", ["ý"]),
+        ("Nesmíš pl_tvat vodou.", ["ý"]),
+        ("Po běhu mě bolí l_tko.", ["ý"]),
+        ("V zimě jezdíme na l_žích.", ["y"]),
+        ("Dítě hlasitě vzl_kalo.", ["y"]),
+        ("Na zahradě roste pel_něk a l_pa.", ["y", "í"]),
     ],
     "M": [
-        {"z": "m_t", "o": "ý", "s": "mýt"},
-        {"z": "m_š", "o": "y", "s": "myš"},
-        {"z": "hm_z", "o": "y", "s": "hmyz"},
-        {"z": "m_lit", "o": "ý", "s": "mýlit"},
-        {"z": "m_č", "o": "í", "s": "míč"},
-        {"z": "m_lý", "o": "i", "s": "milý"},
-        {"z": "m_nce", "o": "i", "s": "mince"},
-        {"z": "m_nuta", "o": "i", "s": "minuta"},
+        ("Ráno si musíš um_t ruce.", ["ý"]),
+        ("V trávě bzučel otravný hm_z.", ["y"]),
+        ("Po cestě lezl pomalý hlem_žď.", ["ý"]),
+        ("Nesmíš se v počtech m_lit.", ["ý"]),
+        ("M_slivec šel brzy do lesa.", ["y"]),
+        ("Doma máme malou bílou m_š.", ["y"]),
+        ("Večer zapomněl zam_kat dveře.", ["y"]),
+        ("M_lá holčička dostala nový m_č.", ["i", "í"]),
     ],
     "P": [
-        {"z": "p_cha", "o": "ý", "s": "pýcha"},
-        {"z": "p_tel", "o": "y", "s": "pytel"},
-        {"z": "kop_to", "o": "y", "s": "kopyto"},
-        {"z": "netop_r", "o": "ý", "s": "netopýr"},
-        {"z": "p_vo", "o": "i", "s": "pivo"},
-        {"z": "p_smeno", "o": "í", "s": "písmeno"},
-        {"z": "p_la", "o": "i", "s": "pila"},
-        {"z": "p_lný", "o": "i", "s": "pilný"},
+        ("Večer vylétl na lov netop_r.", ["ý"]),
+        ("Kůň má tvrdé kop_to.", ["y"]),
+        ("Nenos v sobě tolik p_chy.", ["ý"]),
+        ("Dej brambory do p_tle.", ["y"]),
+        ("Na sluníčku se třp_tí rosa.", ["y"]),
+        ("Chlapec klop_tl o kámen.", ["ý"]),
+        ("V trávě se mihl slep_š.", ["ý"]),
+        ("P_lný žák psal p_smena.", ["i", "í"]),
     ],
     "S": [
-        {"z": "s_n", "o": "y", "s": "syn"},
-        {"z": "s_r", "o": "ý", "s": "sýr"},
-        {"z": "s_tý", "o": "y", "s": "sytý"},
-        {"z": "s_kora", "o": "ý", "s": "sýkora"},
-        {"z": "s_lný", "o": "i", "s": "silný"},
-        {"z": "s_la", "o": "í", "s": "síla"},
-        {"z": "s_rka", "o": "i", "s": "sirka"},
-        {"z": "s_gnál", "o": "i", "s": "signál"},
+        ("Na větvi seděla s_kora.", ["ý"]),
+        ("K obědu byl dobrý s_r.", ["ý"]),
+        ("Můj s_n chodí do školy.", ["y"]),
+        ("Po velkém jídle byl s_tý.", ["y"]),
+        ("Na poli pískal malý s_sel.", ["y"]),
+        ("Venku bylo s_chravé počasí.", ["y"]),
+        ("Had začal nebezpečně s_čet.", ["y"]),
+        ("S_lný chlapec má velkou s_lu.", ["i", "í"]),
     ],
     "V": [
-        {"z": "v_soký", "o": "y", "s": "vysoký"},
-        {"z": "v_r", "o": "ý", "s": "výr"},
-        {"z": "v_dra", "o": "y", "s": "vydra"},
-        {"z": "žv_kat", "o": "ý", "s": "žvýkat"},
-        {"z": "v_la", "o": "í", "s": "víla"},
-        {"z": "v_dle", "o": "i", "s": "vidle"},
-        {"z": "v_tr", "o": "í", "s": "vítr"},
-        {"z": "v_set", "o": "i", "s": "viset"},
+        ("Na stromě houkal v_r.", ["ý"]),
+        ("U rybníka žila v_dra.", ["y"]),
+        ("V_soká věž se tyčí k nebi.", ["y"]),
+        ("Nesmíš žv_kat s plnou pusou.", ["ý"]),
+        ("Musíš si na to zv_knout.", ["y"]),
+        ("Na place byl velký pov_k.", ["y"]),
+        ("Vlk začal v_t na měsíc.", ["ý"]),
+        ("V_soký strom viděla v_la.", ["y", "í"]),
     ],
     "Z": [
-        {"z": "brz_", "o": "y", "s": "brzy"},
-        {"z": "jaz_k", "o": "y", "s": "jazyk"},
-        {"z": "naz_vat", "o": "ý", "s": "nazývat"},
-        {"z": "jaz_ček", "o": "ý", "s": "jazýček"},
-        {"z": "z_ma", "o": "i", "s": "zima"},
-        {"z": "z_p", "o": "i", "s": "zip"},
-        {"z": "z_sk", "o": "i", "s": "zisk"},
-        {"z": "z_dka", "o": "í", "s": "zídka"},
+        ("Přišel jsi dnes moc brz_.", ["y"]),
+        ("Pejsek vyplázl růžový jaz_k.", ["y"]),
+        ("Jak se to štěně bude naz_vat?", ["ý"]),
+        ("Venku byla krutá z_ma.", ["i"]),
+        ("Na bundě se zasekl z_p.", ["i"]),
+        ("Firma měla letos velký z_sk.", ["i"]),
+        ("Brz_ ráno mě bolel jaz_k.", ["y", "y"]),
     ],
 }
 
-VYJMENOVANA_SKUPINY = list(VYJMENOVANA.keys())  # B, F, L, M, P, S, V, Z
+DIKTATY_SKUPINY = list(DIKTATY.keys())  # B, L, M, P, S, V, Z
 
 
 # ============================================================
 # 2) PÁDY — napiš slovo ve správném pádě (jednotné číslo)
-#    Pořadí forem: 1.–7. pád
 # ============================================================
 PAD_OTAZKY = {
     1: "kdo, co",
@@ -120,7 +112,6 @@ PADY_SLOVA = [
 
 # ============================================================
 # 3) MLUVNICKÉ KATEGORIE — urči rod, číslo a pád zvýrazněného slova
-#    rod: m/ž/s · cislo: j/mn · pad: 1–7
 # ============================================================
 MLUVNICKE = [
     {"veta": "Na louce kvetou **květiny**.", "slovo": "květiny", "rod": "ž", "cislo": "mn", "pad": 1},
@@ -140,7 +131,6 @@ MLUVNICKE = [
 
 # ============================================================
 # 4) STAVBA SLOVA — urči část slova (předpona / kořen / přípona)
-#    U každého slova jsou vyplněné jen ty části, které slovo má.
 # ============================================================
 STAVBA = [
     {"slovo": "zahrádka", "predpona": "za", "koren": "hrád", "pripona": "ka"},
@@ -164,17 +154,33 @@ CASTI_LABEL = {"predpona": "předpona", "koren": "kořen", "pripona": "přípona
 # Generátory
 # ============================================================
 
-def vyj_vygeneruj(skupiny, pocet):
+def _vypln(text, odp):
+    out = []
+    k = 0
+    for ch in text:
+        if ch == "_":
+            out.append(odp[k])
+            k += 1
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def diktat_vygeneruj(skupiny, pocet):
     zasoba = []
     for sk in skupiny:
-        for polozka in VYJMENOVANA.get(sk, []):
-            zasoba.append(polozka)
+        for veta, odp in DIKTATY.get(sk, []):
+            zasoba.append((veta, odp))
     if not zasoba:
         return []
+    random.shuffle(zasoba)
+    if pocet <= len(zasoba):
+        vybrane = zasoba[:pocet]
+    else:
+        vybrane = [random.choice(zasoba) for _ in range(pocet)]
     polozky = []
-    for _ in range(pocet):
-        p = random.choice(zasoba)
-        polozky.append({"typ": "vyj", "zadani": p["z"], "odp": p["o"], "slovo": p["s"]})
+    for veta, odp in vybrane:
+        polozky.append({"typ": "diktat", "text": veta, "odp": odp, "plny": _vypln(veta, odp)})
     return polozky
 
 
@@ -185,8 +191,6 @@ def pady_vygeneruj(pocet):
         pad = random.randint(2, 7)
         polozky.append({
             "typ": "pad",
-            "slovo1": n["slovo"],
-            "pad": pad,
             "zadani": f"Napiš slovo „{n['slovo']}“ v {pad}. pádě j. č. ({PAD_OTAZKY[pad]}):",
             "odp": n["formy"][pad - 1],
         })
@@ -197,14 +201,8 @@ def mluvnicke_vygeneruj(pocet):
     zasoba = MLUVNICKE[:]
     random.shuffle(zasoba)
     vybrane = zasoba[:pocet] if pocet <= len(zasoba) else [random.choice(MLUVNICKE) for _ in range(pocet)]
-    polozky = []
-    for m in vybrane:
-        polozky.append({
-            "typ": "kat",
-            "veta": m["veta"], "slovo": m["slovo"],
-            "rod": m["rod"], "cislo": m["cislo"], "pad": m["pad"],
-        })
-    return polozky
+    return [{"typ": "kat", "veta": m["veta"], "slovo": m["slovo"],
+             "rod": m["rod"], "cislo": m["cislo"], "pad": m["pad"]} for m in vybrane]
 
 
 def stavba_vygeneruj(pocet):
@@ -213,20 +211,14 @@ def stavba_vygeneruj(pocet):
         s = random.choice(STAVBA)
         casti = [k for k in ("predpona", "koren", "pripona") if s[k]]
         cil = random.choice(casti)
-        # zvýrazníme hledanou část tučně
-        cast_text = s[cil]
-        zvyrazneno = s["slovo"].replace(cast_text, f"<b>{cast_text}</b>", 1)
-        polozky.append({
-            "typ": "stavba",
-            "slovo": s["slovo"],
-            "zvyrazneno": zvyrazneno,
-            "odp": CASTI_LABEL[cil],
-        })
+        zvyrazneno = s["slovo"].replace(s[cil], f"<b>{s[cil]}</b>", 1)
+        polozky.append({"typ": "stavba", "slovo": s["slovo"],
+                        "zvyrazneno": zvyrazneno, "odp": CASTI_LABEL[cil]})
     return polozky
 
 
 SUBMODULY = {
-    "Vyjmenovaná slova (i/y)": "vyj",
+    "Diktát (vyjmenovaná slova)": "diktat",
     "Pády": "pady",
     "Mluvnické kategorie": "kat",
     "Stavba slova": "stavba",

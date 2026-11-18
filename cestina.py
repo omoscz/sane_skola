@@ -284,12 +284,20 @@ STAVBA = [
     {"slovo": "přístav", "predpona": "pří", "koren": "stav", "pripona": ""},
     {"slovo": "výlet", "predpona": "vý", "koren": "let", "pripona": ""},
     {"slovo": "zápis", "predpona": "zá", "koren": "pis", "pripona": ""},
-    {"slovo": "učitel", "predpona": "", "koren": "uč", "pripona": "tel"},
+    {"slovo": "učitel", "predpona": "", "koren": "uč", "pripona": "itel"},
     {"slovo": "lesík", "predpona": "", "koren": "les", "pripona": "ík"},
     {"slovo": "domek", "predpona": "", "koren": "dom", "pripona": "ek"},
     {"slovo": "rybník", "predpona": "", "koren": "ryb", "pripona": "ník"},
     {"slovo": "sklenička", "predpona": "", "koren": "sklen", "pripona": "ička"},
     {"slovo": "květina", "predpona": "", "koren": "květ", "pripona": "ina"},
+    {"slovo": "prales", "predpona": "pra", "koren": "les", "pripona": ""},
+    {"slovo": "nadpis", "predpona": "nad", "koren": "pis", "pripona": ""},
+    {"slovo": "odchod", "predpona": "od", "koren": "chod", "pripona": ""},
+    {"slovo": "rozchod", "predpona": "roz", "koren": "chod", "pripona": ""},
+    {"slovo": "příchod", "predpona": "pří", "koren": "chod", "pripona": ""},
+    {"slovo": "nálet", "predpona": "ná", "koren": "let", "pripona": ""},
+    {"slovo": "stromek", "predpona": "", "koren": "strom", "pripona": "ek"},
+    {"slovo": "lesník", "predpona": "", "koren": "les", "pripona": "ník"},
 ]
 
 CASTI_LABEL = {"predpona": "předpona", "koren": "kořen", "pripona": "přípona"}
@@ -351,15 +359,11 @@ def mluvnicke_vygeneruj(pocet):
 
 
 def stavba_vygeneruj(pocet):
-    polozky = []
-    for _ in range(pocet):
-        s = random.choice(STAVBA)
-        casti = [k for k in ("predpona", "koren", "pripona") if s[k]]
-        cil = random.choice(casti)
-        zvyrazneno = s["slovo"].replace(s[cil], f"<b>{s[cil]}</b>", 1)
-        polozky.append({"typ": "stavba", "slovo": s["slovo"],
-                        "zvyrazneno": zvyrazneno, "odp": CASTI_LABEL[cil]})
-    return polozky
+    zasoba = STAVBA[:]
+    random.shuffle(zasoba)
+    vyber = zasoba[:pocet] if pocet <= len(zasoba) else [random.choice(STAVBA) for _ in range(pocet)]
+    return [{"typ": "stavba", "slovo": s["slovo"], "predpona": s["predpona"],
+             "koren": s["koren"], "pripona": s["pripona"]} for s in vyber]
 
 
 SUBMODULY = {

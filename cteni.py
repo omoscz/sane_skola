@@ -1,10 +1,10 @@
 # cteni.py — lokální generátor slabik a slov pro trénink čtení (1. třída)
 import random
 
-SAMOHLASKY = ["a", "e", "i", "o", "u", "y", "á", "é", "í", "ó", "ú", "ů", "ý"]
+SAMOHLASKY = ["a", "á", "e", "é", "i", "í", "o", "ó", "u", "ú", "ů", "y", "ý"]
 
-SOUHLASKY = ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n",
-             "p", "r", "s", "t", "v", "z", "č", "ř", "š", "ž"]
+SOUHLASKY = ["b", "c", "č", "d", "f", "g", "h", "j", "k", "l", "m",
+             "n", "p", "r", "ř", "s", "š", "t", "v", "z", "ž"]
 
 # Kurátorský seznam jednoduchých českých slov pro začínající čtenáře.
 # Slovo se nabídne jen tehdy, když jsou všechna jeho písmena mezi vybranými.

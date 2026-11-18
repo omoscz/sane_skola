@@ -48,7 +48,7 @@ def sara_dvojciferne():
 
 def sara_deleni_se_zbytkem():
     delitel = random.randint(2, 9)
-    podil = random.randint(2, 19)
+    podil = random.randint(2, 10)
     zbytek = random.randint(1, delitel - 1)
     delenec = delitel * podil + zbytek
     return {"typ": "zbytek", "zadani": f"{delenec} : {delitel} =", "podil": podil, "zbytek": zbytek}

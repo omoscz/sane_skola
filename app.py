@@ -8,6 +8,13 @@ import cteni
 st.set_page_config(page_title="Škola hrou", page_icon="🎒", layout="centered")
 
 
+def _oznac_vse(keys, zdroj):
+    # Nastaví všem písmenům ve skupině stejnou hodnotu jako "Označit vše"
+    hodnota = st.session_state[zdroj]
+    for k in keys:
+        st.session_state[k] = hodnota
+
+
 def velky_text(text, velikost="2rem"):
     st.markdown(
         f"<div style='font-size:{velikost};font-weight:600;margin:4px 0'>{text}</div>",
@@ -141,8 +148,13 @@ def spust_matematiku(profil, moduly):
 def spust_cteni():
     st.caption("Rodič: zaškrtni písmena, která už Nela zná. Appka složí slabiky a slova jen z nich.")
 
+    sam_keys = [f"cteni_sam_{p}" for p in cteni.SAMOHLASKY]
+    souh_keys = [f"cteni_souh_{p}" for p in cteni.SOUHLASKY]
+
     vybrane_samohlasky = []
     with st.expander("🔵 Samohlásky", expanded=True):
+        st.checkbox("Označit vše", key="cteni_sam_all",
+                    on_change=_oznac_vse, args=(sam_keys, "cteni_sam_all"))
         cols = st.columns(7)
         for idx, p in enumerate(cteni.SAMOHLASKY):
             with cols[idx % 7]:
@@ -151,6 +163,8 @@ def spust_cteni():
 
     vybrane_souhlasky = []
     with st.expander("🟢 Souhlásky", expanded=True):
+        st.checkbox("Označit vše", key="cteni_souh_all",
+                    on_change=_oznac_vse, args=(souh_keys, "cteni_souh_all"))
         cols = st.columns(7)
         for idx, p in enumerate(cteni.SOUHLASKY):
             with cols[idx % 7]:

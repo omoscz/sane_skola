@@ -273,9 +273,15 @@ def spust_cestinu():
             with c3:
                 st.radio("pád", ["1", "2", "3", "4", "5", "6", "7"], index=None, key=f"cj_{tid}_{i}_pad")
         elif p["typ"] == "stavba":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['zvyrazneno']}")
-            st.radio("část", ["předpona", "kořen", "přípona"], index=None, horizontal=True,
-                     key=f"cj_{tid}_{i}", label_visibility="collapsed")
+            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['slovo']}")
+            st.caption("Rozděl slovo. Pokud některá část chybí, nech políčko prázdné.")
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.text_input("Předpona", key=f"cj_{tid}_{i}_pred")
+            with c2:
+                st.text_input("Kořen", key=f"cj_{tid}_{i}_kor")
+            with c3:
+                st.text_input("Přípona", key=f"cj_{tid}_{i}_prip")
         st.write("")
 
     if st.button("✅ Zkontrolovat", type="primary", key=f"cj_check_{tid}"):
@@ -302,15 +308,21 @@ def spust_cestinu():
             zadani = p["text"]
             moje_str = cestina._vypln(p["text"], moje_pismena) if "_" not in moje_pismena else " / ".join(moje_pismena)
             spravne_str = p["plny"]
+        elif p["typ"] == "stavba":
+            mpr_ = (st.session_state.get(f"cj_{tid}_{i}_pred") or "").strip().lower()
+            mk = (st.session_state.get(f"cj_{tid}_{i}_kor") or "").strip().lower()
+            mpp = (st.session_state.get(f"cj_{tid}_{i}_prip") or "").strip().lower()
+            cor = int(mpr_ == p["predpona"]) + int(mk == p["koren"]) + int(mpp == p["pripona"])
+            maximum += 3
+            ziskano += cor
+            ok = (cor == 3)
+            zadani = f"rozděl „{p['slovo']}“"
+            moje_str = f"před: {mpr_ or '–'} / kořen: {mk or '–'} / příp: {mpp or '–'}"
+            spravne_str = (f"před: {p['predpona'] or '–'} / kořen: {p['koren']} / "
+                           f"příp: {p['pripona'] or '–'}")
         else:
             maximum += 1
-            if p["typ"] == "stavba":
-                moje = st.session_state.get(f"cj_{tid}_{i}")
-                ok = (moje == p["odp"])
-                zadani = f"část slova „{p['slovo']}“"
-                moje_str = moje or "—"
-                spravne_str = p["odp"]
-            elif p["typ"] == "pad":
+            if p["typ"] == "pad":
                 moje = (st.session_state.get(f"cj_{tid}_{i}") or "").strip()
                 ok = (moje.lower() == p["odp"].lower())
                 zadani = p["zadani"]

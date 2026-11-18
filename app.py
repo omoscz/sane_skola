@@ -239,6 +239,8 @@ def spust_cestinu():
                 pol = cestina.pady_vygeneruj(pocet)
             elif sub == "kat":
                 pol = cestina.mluvnicke_vygeneruj(pocet)
+            elif sub == "druhy":
+                pol = cestina.druhy_vygeneruj(pocet)
             else:
                 pol = cestina.stavba_vygeneruj(pocet)
             st.session_state["cj_test"] = {
@@ -283,6 +285,14 @@ def spust_cestinu():
                 st.text_input("Kořen", key=f"cj_{tid}_{i}_kor")
             with c3:
                 st.text_input("Přípona", key=f"cj_{tid}_{i}_prip")
+        elif p["typ"] == "druhy":
+            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['veta']}", "1.3rem")
+            st.caption("Klikni na podstatná jména (můžeš jich označit víc):")
+            st.pills("podstatná jména", p["slova"], selection_mode="multi",
+                     key=f"cj_{tid}_{i}_pj", label_visibility="collapsed")
+            st.caption("Klikni na slovesa:")
+            st.pills("slovesa", p["slova"], selection_mode="multi",
+                     key=f"cj_{tid}_{i}_sl", label_visibility="collapsed")
         st.write("")
 
     if st.button("✅ Zkontrolovat", type="primary", key=f"cj_check_{tid}"):
@@ -321,6 +331,22 @@ def spust_cestinu():
             moje_str = f"před: {mpr_ or '–'} / kořen: {mk or '–'} / příp: {mpp or '–'}"
             spravne_str = (f"před: {p['predpona'] or '–'} / kořen: {p['koren']} / "
                            f"příp: {p['pripona'] or '–'}")
+        elif p["typ"] == "druhy":
+            moje_pj = set(st.session_state.get(f"cj_{tid}_{i}_pj") or [])
+            moje_sl = set(st.session_state.get(f"cj_{tid}_{i}_sl") or [])
+            spr_pj = set(p["podst"])
+            spr_sl = set(p["slovesa"])
+            # bod za každé správně označené slovo, mínus za chybně označené (min. 0)
+            bod_pj = max(0, len(moje_pj & spr_pj) - len(moje_pj - spr_pj))
+            bod_sl = max(0, len(moje_sl & spr_sl) - len(moje_sl - spr_sl))
+            maximum += len(spr_pj) + len(spr_sl)
+            ziskano += bod_pj + bod_sl
+            ok = (moje_pj == spr_pj and moje_sl == spr_sl)
+            zadani = p["veta"]
+            moje_str = (f"podst.: {', '.join(sorted(moje_pj)) or '—'} · "
+                        f"slovesa: {', '.join(sorted(moje_sl)) or '—'}")
+            spravne_str = (f"podst.: {', '.join(p['podst'])} · "
+                           f"slovesa: {', '.join(p['slovesa'])}")
         else:
             maximum += 1
             if p["typ"] == "pad":

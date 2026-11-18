@@ -47,7 +47,7 @@ def spust_matematiku(profil, moduly):
     if modul in ("scitani_odcitani", "porovnavani"):
         limit = st.radio("Do kolika počítáme?", [5, 10, 20], horizontal=True, index=1, key=f"{profil}_limit")
 
-    pocet = st.slider("Počet příkladů", min_value=3, max_value=20, value=8, key=f"{profil}_pocet")
+    pocet = st.slider("Počet příkladů", min_value=1, max_value=20, value=8, key=f"{profil}_pocet")
 
     if st.button("🎲 Vygenerovat příklady", type="primary", key=f"{profil}_gen"):
         test_id = st.session_state.get(f"{profil}_testid", 0) + 1
@@ -84,6 +84,7 @@ def spust_matematiku(profil, moduly):
         elif p["typ"] == "porovnani":
             velky_text(f"{i + 1}.&nbsp;&nbsp;{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem")
             st.radio("znaménko", ["<", "=", ">"], index=None, horizontal=True,
+                     format_func=lambda z: {"<": "\\<", ">": "\\>"}.get(z, z),
                      key=f"{profil}_cmp_{tid}_{i}", label_visibility="collapsed")
         st.write("")
 

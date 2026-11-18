@@ -201,6 +201,7 @@ def spust_cteni():
                 with cols[j]:
                     st.markdown(
                         f"<div style='font-size:2.6rem;font-weight:700;text-align:center;"
+                        f"text-transform:uppercase;letter-spacing:2px;"
                         f"padding:14px;margin:6px 0;border-radius:12px;"
                         f"background:rgba(120,120,120,0.12)'>{slovo}</div>",
                         unsafe_allow_html=True,

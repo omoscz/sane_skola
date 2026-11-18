@@ -158,7 +158,7 @@ def spust_cteni():
         cols = st.columns(7)
         for idx, p in enumerate(cteni.SAMOHLASKY):
             with cols[idx % 7]:
-                if st.checkbox(p, key=f"cteni_sam_{p}"):
+                if st.checkbox(p.upper(), key=f"cteni_sam_{p}"):
                     vybrane_samohlasky.append(p)
 
     vybrane_souhlasky = []
@@ -168,7 +168,7 @@ def spust_cteni():
         cols = st.columns(7)
         for idx, p in enumerate(cteni.SOUHLASKY):
             with cols[idx % 7]:
-                if st.checkbox(p, key=f"cteni_souh_{p}"):
+                if st.checkbox(p.upper(), key=f"cteni_souh_{p}"):
                     vybrane_souhlasky.append(p)
 
     rezim = st.radio("Co trénujeme?", ["Slabiky", "Slova"], horizontal=True, key="cteni_rezim")

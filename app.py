@@ -3,6 +3,7 @@ import urllib.parse
 import streamlit as st
 
 import matematika
+import cteni
 
 st.set_page_config(page_title="Škola hrou", page_icon="🎒", layout="centered")
 
@@ -137,6 +138,60 @@ def spust_matematiku(profil, moduly):
         whatsapp_odkazy(profil, test["modul_nazev"], skore, pocet, chyby)
 
 
+def spust_cteni():
+    st.caption("Rodič: zaškrtni písmena, která už Nela zná. Appka složí slabiky a slova jen z nich.")
+
+    vybrane_samohlasky = []
+    with st.expander("🔵 Samohlásky", expanded=True):
+        cols = st.columns(7)
+        for idx, p in enumerate(cteni.SAMOHLASKY):
+            with cols[idx % 7]:
+                if st.checkbox(p, key=f"cteni_sam_{p}"):
+                    vybrane_samohlasky.append(p)
+
+    vybrane_souhlasky = []
+    with st.expander("🟢 Souhlásky", expanded=True):
+        cols = st.columns(7)
+        for idx, p in enumerate(cteni.SOUHLASKY):
+            with cols[idx % 7]:
+                if st.checkbox(p, key=f"cteni_souh_{p}"):
+                    vybrane_souhlasky.append(p)
+
+    rezim = st.radio("Co trénujeme?", ["Slabiky", "Slova"], horizontal=True, key="cteni_rezim")
+    pocet = st.slider("Kolik jich ukázat?", min_value=3, max_value=24, value=9, key="cteni_pocet")
+
+    if st.button("👀 Ukázat", type="primary", key="cteni_gen"):
+        pismena = vybrane_samohlasky + vybrane_souhlasky
+        if rezim == "Slabiky":
+            if not vybrane_samohlasky or not vybrane_souhlasky:
+                st.warning("Vyber aspoň jednu samohlásku a jednu souhlásku.")
+                st.session_state.pop("cteni_polozky", None)
+            else:
+                st.session_state["cteni_polozky"] = cteni.vygeneruj_slabiky(
+                    pocet, vybrane_samohlasky, vybrane_souhlasky)
+        else:
+            polozky = cteni.vygeneruj_slova(pocet, pismena)
+            if not polozky:
+                st.warning("Z vybraných písmen zatím nejde složit žádné slovo. Zkus přidat další písmena.")
+                st.session_state.pop("cteni_polozky", None)
+            else:
+                st.session_state["cteni_polozky"] = polozky
+
+    polozky = st.session_state.get("cteni_polozky")
+    if polozky:
+        st.write("---")
+        for radek_start in range(0, len(polozky), 3):
+            cols = st.columns(3)
+            for j, slovo in enumerate(polozky[radek_start:radek_start + 3]):
+                with cols[j]:
+                    st.markdown(
+                        f"<div style='font-size:2.6rem;font-weight:700;text-align:center;"
+                        f"padding:14px;margin:6px 0;border-radius:12px;"
+                        f"background:rgba(120,120,120,0.12)'>{slovo}</div>",
+                        unsafe_allow_html=True,
+                    )
+
+
 # --- UI ---
 st.sidebar.title("🎒 Škola hrou")
 profil = st.sidebar.radio("Kdo cvičí?", ["Nela (1. třída)", "Sára (4. třída)"])
@@ -147,7 +202,7 @@ if profil.startswith("Nela"):
     with tab_mat:
         spust_matematiku("Nela", matematika.NELA_MODULY)
     with tab_cteni:
-        st.info("📖 Trénink čtení připravujeme (Fáze 2).")
+        spust_cteni()
 else:
     st.title("🧒 Sára — 4. třída")
     tab_mat, tab_cj = st.tabs(["🔢 Matematika", "✏️ Český jazyk"])

@@ -4,6 +4,7 @@ import streamlit as st
 
 import matematika
 import cteni
+import cestina
 
 st.set_page_config(page_title="Škola hrou", page_icon="🎒", layout="centered")
 
@@ -206,6 +207,126 @@ def spust_cteni():
                     )
 
 
+ROD_MAP = {"mužský": "m", "ženský": "ž", "střední": "s"}
+CISLO_MAP = {"jednotné": "j", "množné": "mn"}
+ROD_NAZEV = {"m": "mužský", "ž": "ženský", "s": "střední"}
+CISLO_NAZEV = {"j": "jednotné", "mn": "množné"}
+
+
+def spust_cestinu():
+    nazvy = list(cestina.SUBMODULY.keys())
+    sub_nazev = st.selectbox("Vyber cvičení", nazvy, key="cj_sub")
+    sub = cestina.SUBMODULY[sub_nazev]
+
+    skupiny = None
+    if sub == "vyj":
+        skupiny = st.multiselect("Skupiny (podle písmene)", cestina.VYJMENOVANA_SKUPINY,
+                                 default=cestina.VYJMENOVANA_SKUPINY, key="cj_skupiny")
+
+    pocet = st.slider("Počet příkladů", min_value=1, max_value=20, value=8, key="cj_pocet")
+
+    if st.button("🎲 Vygenerovat", type="primary", key="cj_gen"):
+        if sub == "vyj" and not skupiny:
+            st.warning("Vyber aspoň jednu skupinu písmen.")
+        else:
+            tid = st.session_state.get("cj_testid", 0) + 1
+            st.session_state["cj_testid"] = tid
+            if sub == "vyj":
+                pol = cestina.vyj_vygeneruj(skupiny, pocet)
+            elif sub == "pady":
+                pol = cestina.pady_vygeneruj(pocet)
+            elif sub == "kat":
+                pol = cestina.mluvnicke_vygeneruj(pocet)
+            else:
+                pol = cestina.stavba_vygeneruj(pocet)
+            st.session_state["cj_test"] = {
+                "polozky": pol, "sub_nazev": sub_nazev, "test_id": tid, "zkontrolovano": False,
+            }
+
+    test = st.session_state.get("cj_test")
+    if not test:
+        return
+    tid = test["test_id"]
+    st.write("---")
+
+    for i, p in enumerate(test["polozky"]):
+        if p["typ"] == "vyj":
+            velky_text(f"{i + 1}.&nbsp;&nbsp;Doplň: {p['zadani']}")
+            st.radio("odpověď", ["i", "í", "y", "ý"], index=None, horizontal=True,
+                     key=f"cj_{tid}_{i}", label_visibility="collapsed")
+        elif p["typ"] == "pad":
+            st.markdown(f"**{i + 1}.** {p['zadani']}")
+            st.text_input("odpověď", key=f"cj_{tid}_{i}", label_visibility="collapsed")
+        elif p["typ"] == "kat":
+            st.markdown(f"**{i + 1}.** {p['veta']}", unsafe_allow_html=True)
+            st.caption(f"Urči u slova „{p['slovo']}“:")
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.radio("rod", ["mužský", "ženský", "střední"], index=None, key=f"cj_{tid}_{i}_rod")
+            with c2:
+                st.radio("číslo", ["jednotné", "množné"], index=None, key=f"cj_{tid}_{i}_cislo")
+            with c3:
+                st.radio("pád", ["1", "2", "3", "4", "5", "6", "7"], index=None, key=f"cj_{tid}_{i}_pad")
+        elif p["typ"] == "stavba":
+            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['zvyrazneno']}")
+            st.radio("část", ["předpona", "kořen", "přípona"], index=None, horizontal=True,
+                     key=f"cj_{tid}_{i}", label_visibility="collapsed")
+        st.write("")
+
+    if st.button("✅ Zkontrolovat", type="primary", key=f"cj_check_{tid}"):
+        test["zkontrolovano"] = True
+    if not test.get("zkontrolovano"):
+        return
+
+    st.write("---")
+    skore = 0
+    chyby = []
+    for i, p in enumerate(test["polozky"]):
+        if p["typ"] == "vyj":
+            moje = st.session_state.get(f"cj_{tid}_{i}")
+            ok = (moje == p["odp"])
+            zadani = f"{p['zadani']} ({p['slovo']})"
+            moje_str = moje or "—"
+            spravne_str = f"{p['odp']} → {p['slovo']}"
+        elif p["typ"] == "stavba":
+            moje = st.session_state.get(f"cj_{tid}_{i}")
+            ok = (moje == p["odp"])
+            zadani = f"část slova „{p['slovo']}“"
+            moje_str = moje or "—"
+            spravne_str = p["odp"]
+        elif p["typ"] == "pad":
+            moje = (st.session_state.get(f"cj_{tid}_{i}") or "").strip()
+            ok = (moje.lower() == p["odp"].lower())
+            zadani = p["zadani"]
+            moje_str = moje or "—"
+            spravne_str = p["odp"]
+        else:  # kat
+            mr = st.session_state.get(f"cj_{tid}_{i}_rod")
+            mc = st.session_state.get(f"cj_{tid}_{i}_cislo")
+            mp_ = st.session_state.get(f"cj_{tid}_{i}_pad")
+            ok = (ROD_MAP.get(mr) == p["rod"] and CISLO_MAP.get(mc) == p["cislo"] and mp_ == str(p["pad"]))
+            zadani = f"„{p['slovo']}“ — rod/číslo/pád"
+            moje_str = f"{mr or '—'} / {mc or '—'} / {mp_ or '—'}"
+            spravne_str = f"{ROD_NAZEV[p['rod']]} / {CISLO_NAZEV[p['cislo']]} / {p['pad']}."
+
+        if ok:
+            skore += 1
+            st.markdown(f"✅ **{i + 1}.** {zadani}  →  {spravne_str}")
+        else:
+            st.markdown(f"❌ **{i + 1}.** {zadani}  →  tvoje: {moje_str} · správně: **{spravne_str}**")
+            chyby.append((zadani, moje_str, spravne_str))
+
+    pocet_c = len(test["polozky"])
+    st.write("---")
+    velky_text(f"Skóre: {skore} / {pocet_c}", "1.6rem")
+    if skore == pocet_c:
+        st.balloons()
+        st.success("🎉 Všechno správně! Výborně!")
+
+    st.write("---")
+    whatsapp_odkazy("Sára", test["sub_nazev"], skore, pocet_c, chyby)
+
+
 # --- UI ---
 st.sidebar.title("🎒 Škola hrou")
 profil = st.sidebar.radio("Kdo cvičí?", ["Nela (1. třída)", "Sára (4. třída)"])
@@ -223,4 +344,4 @@ else:
     with tab_mat:
         spust_matematiku("Sára", matematika.SARA_MODULY)
     with tab_cj:
-        st.info("✏️ Český jazyk připravujeme (Fáze 3).")
+        spust_cestinu()

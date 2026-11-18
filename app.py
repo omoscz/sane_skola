@@ -78,20 +78,20 @@ def spust_matematiku(profil, moduly):
     for i, p in enumerate(test["polozky"]):
         if p["typ"] in ("cislo", "slovni"):
             if p["typ"] == "slovni":
-                st.markdown(f"**{i + 1}.** {p['zadani']}")
+                st.markdown(p['zadani'])
             else:
-                velky_text(f"{i + 1}.&nbsp;&nbsp;{p['zadani']}")
+                velky_text(p['zadani'])
             st.number_input("odpověď", value=None, step=1, format="%d",
                             key=f"{profil}_odp_{tid}_{i}", label_visibility="collapsed")
         elif p["typ"] == "zbytek":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['zadani']}")
+            velky_text(p['zadani'])
             c1, c2 = st.columns(2)
             with c1:
                 st.number_input("podíl", value=None, step=1, format="%d", key=f"{profil}_podil_{tid}_{i}")
             with c2:
                 st.number_input("zbytek", value=None, step=1, format="%d", key=f"{profil}_zbytek_{tid}_{i}")
         elif p["typ"] == "porovnani":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem")
+            velky_text(f"{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem")
             st.radio("znaménko", ["<", "=", ">"], index=None, horizontal=True,
                      format_func=lambda z: {"<": "\\<", ">": "\\>"}.get(z, z),
                      key=f"{profil}_cmp_{tid}_{i}", label_visibility="collapsed")

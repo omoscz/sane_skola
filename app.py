@@ -328,7 +328,7 @@ def spust_cestinu():
             with c3:
                 st.radio("pád", ["1", "2", "3", "4", "5", "6", "7"], index=None, key=f"cj_{tid}_{i}_pad")
         elif p["typ"] == "stavba":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['slovo']}")
+            velky_text(f"{cislo}{p['slovo']}", barva=barva)
             st.caption("Rozděl slovo. Pokud některá část chybí, nech políčko prázdné.")
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -338,7 +338,7 @@ def spust_cestinu():
             with c3:
                 st.text_input("Přípona", key=f"cj_{tid}_{i}_prip")
         elif p["typ"] == "druhy":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['veta']}", "1.3rem")
+            velky_text(f"{cislo}{p['veta']}", "1.3rem", barva=barva)
             st.caption("Klikni na podstatná jména (můžeš jich označit víc):")
             st.pills("podstatná jména", p["slova"], selection_mode="multi",
                      key=f"cj_{tid}_{i}_pj", label_visibility="collapsed")

@@ -108,7 +108,7 @@ def spust_matematiku(profil, moduly):
                 st.number_input("zbytek", value=None, step=1, format="%d", key=f"{profil}_zbytek_{tid}_{i}")
         elif p["typ"] == "porovnani":
             velky_text(f"{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem", barva=barva)
-            st.radio("znaménko", ["<", "=", ">"], index=None, horizontal=True,
+            st.pills("znaménko", ["<", "=", ">"], selection_mode="single",
                      format_func=lambda z: {"<": "\\<", ">": "\\>"}.get(z, z),
                      key=f"{profil}_cmp_{tid}_{i}", label_visibility="collapsed")
         st.write("")

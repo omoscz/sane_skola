@@ -1,3 +1,4 @@
+import re
 import urllib.parse
 
 import streamlit as st
@@ -16,9 +17,15 @@ def _oznac_vse(keys, zdroj):
         st.session_state[k] = hodnota
 
 
-def velky_text(text, velikost="2rem"):
+CERVENA = "#ff4b4b"  # barva pro špatně vyřešené zadání
+
+
+def velky_text(text, velikost="2rem", barva=None):
+    styl = f"font-size:{velikost};font-weight:600;margin:4px 0"
+    if barva:
+        styl += f";color:{barva}"
     st.markdown(
-        f"<div style='font-size:{velikost};font-weight:600;margin:4px 0'>{text}</div>",
+        f"<div style='{styl}'>{text}</div>",
         unsafe_allow_html=True,
     )
 
@@ -45,6 +52,16 @@ def whatsapp_odkazy(profil, modul_nazev, skore, pocet, chyby):
             i += 1
     if i == 0:
         st.caption("ℹ️ Pro odesílání na WhatsApp doplň čísla do Secrets (WHATSAPP_MAMA / WHATSAPP_TATA).")
+
+
+def _mat_ok(profil, tid, i, p):
+    # Je příklad vyřešený správně? (čte aktuální odpovědi ze session_state)
+    if p["typ"] in ("cislo", "slovni"):
+        return st.session_state.get(f"{profil}_odp_{tid}_{i}") == p["odpoved"]
+    if p["typ"] == "zbytek":
+        return (st.session_state.get(f"{profil}_podil_{tid}_{i}") == p["podil"]
+                and st.session_state.get(f"{profil}_zbytek_{tid}_{i}") == p["zbytek"])
+    return st.session_state.get(f"{profil}_cmp_{tid}_{i}") == p["odpoved"]  # porovnani
 
 
 def spust_matematiku(profil, moduly):
@@ -75,23 +92,29 @@ def spust_matematiku(profil, moduly):
     tid = test["test_id"]
     st.write("---")
 
+    zkontrolovano = test.get("zkontrolovano")
     for i, p in enumerate(test["polozky"]):
+        barva = CERVENA if (zkontrolovano and not _mat_ok(profil, tid, i, p)) else None
         if p["typ"] in ("cislo", "slovni"):
             if p["typ"] == "slovni":
-                st.markdown(p['zadani'])
+                if barva:
+                    st.markdown(f"<span style='color:{barva}'>{p['zadani']}</span>",
+                                unsafe_allow_html=True)
+                else:
+                    st.markdown(p['zadani'])
             else:
-                velky_text(p['zadani'])
+                velky_text(p['zadani'], barva=barva)
             st.number_input("odpověď", value=None, step=1, format="%d",
                             key=f"{profil}_odp_{tid}_{i}", label_visibility="collapsed")
         elif p["typ"] == "zbytek":
-            velky_text(p['zadani'])
+            velky_text(p['zadani'], barva=barva)
             c1, c2 = st.columns(2)
             with c1:
                 st.number_input("podíl", value=None, step=1, format="%d", key=f"{profil}_podil_{tid}_{i}")
             with c2:
                 st.number_input("zbytek", value=None, step=1, format="%d", key=f"{profil}_zbytek_{tid}_{i}")
         elif p["typ"] == "porovnani":
-            velky_text(f"{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem")
+            velky_text(f"{p['a']} &nbsp;?&nbsp; {p['b']}", "2.4rem", barva=barva)
             st.radio("znaménko", ["<", "=", ">"], index=None, horizontal=True,
                      format_func=lambda z: {"<": "\\<", ">": "\\>"}.get(z, z),
                      key=f"{profil}_cmp_{tid}_{i}", label_visibility="collapsed")
@@ -99,6 +122,7 @@ def spust_matematiku(profil, moduly):
 
     if st.button("✅ Zkontrolovat", type="primary", key=f"{profil}_check_{tid}"):
         test["zkontrolovano"] = True
+        st.rerun()
 
     if not test.get("zkontrolovano"):
         return
@@ -129,9 +153,9 @@ def spust_matematiku(profil, moduly):
         zadani = p["zadani"] if p["typ"] != "porovnani" else p_zadani
         if ok:
             skore += 1
-            st.markdown(f"✅ **{i + 1}.** {zadani}  →  {spravne_str}")
+            st.markdown(f"✅ {zadani}  →  {spravne_str}")
         else:
-            st.markdown(f"❌ **{i + 1}.** {zadani}  →  tvoje: {moje_str} · správně: **{spravne_str}**")
+            st.markdown(f"❌ {zadani}  →  tvoje: {moje_str} · správně: **{spravne_str}**")
             chyby.append((zadani, moje_str, spravne_str))
 
     pocet = len(test["polozky"])
@@ -214,6 +238,30 @@ ROD_NAZEV = {"m": "mužský", "ž": "ženský", "s": "střední"}
 CISLO_NAZEV = {"j": "jednotné", "mn": "množné"}
 
 
+def _cj_ok(tid, i, p):
+    # Je položka češtiny vyřešená správně? (čte aktuální odpovědi ze session_state)
+    if p["typ"] == "diktat":
+        return all(st.session_state.get(f"cj_{tid}_{i}_b{j}") == sp
+                   for j, sp in enumerate(p["odp"]))
+    if p["typ"] == "stavba":
+        mpr_ = (st.session_state.get(f"cj_{tid}_{i}_pred") or "").strip().lower()
+        mk = (st.session_state.get(f"cj_{tid}_{i}_kor") or "").strip().lower()
+        mpp = (st.session_state.get(f"cj_{tid}_{i}_prip") or "").strip().lower()
+        return mpr_ == p["predpona"] and mk == p["koren"] and mpp == p["pripona"]
+    if p["typ"] == "druhy":
+        moje_pj = set(st.session_state.get(f"cj_{tid}_{i}_pj") or [])
+        moje_sl = set(st.session_state.get(f"cj_{tid}_{i}_sl") or [])
+        return moje_pj == set(p["podst"]) and moje_sl == set(p["slovesa"])
+    if p["typ"] == "pad":
+        return (st.session_state.get(f"cj_{tid}_{i}") or "").strip().lower() == p["odp"].lower()
+    # kat
+    mr = st.session_state.get(f"cj_{tid}_{i}_rod")
+    mc = st.session_state.get(f"cj_{tid}_{i}_cislo")
+    mp_ = st.session_state.get(f"cj_{tid}_{i}_pad")
+    return (ROD_MAP.get(mr) == p["rod"] and CISLO_MAP.get(mc) == p["cislo"]
+            and mp_ == str(p["pad"]))
+
+
 def spust_cestinu():
     nazvy = list(cestina.SUBMODULY.keys())
     sub_nazev = st.selectbox("Vyber cvičení", nazvy, key="cj_sub")
@@ -253,9 +301,12 @@ def spust_cestinu():
     tid = test["test_id"]
     st.write("---")
 
+    zkontrolovano = test.get("zkontrolovano")
     for i, p in enumerate(test["polozky"]):
+        barva = CERVENA if (zkontrolovano and not _cj_ok(tid, i, p)) else None
+        cislo = f"{i + 1}.&nbsp;&nbsp;"
         if p["typ"] == "diktat":
-            velky_text(f"{i + 1}.&nbsp;&nbsp;{p['text']}", "1.3rem")
+            velky_text(f"{cislo}{p['text']}", "1.3rem", barva=barva)
             pocet_mezer = len(p["odp"])
             cols = st.columns(pocet_mezer)
             for j in range(pocet_mezer):
@@ -263,10 +314,11 @@ def spust_cestinu():
                     st.radio(f"mezera {j + 1}", ["i", "í", "y", "ý"], index=None,
                              key=f"cj_{tid}_{i}_b{j}", label_visibility="collapsed")
         elif p["typ"] == "pad":
-            st.markdown(f"**{i + 1}.** {p['zadani']}")
+            velky_text(f"{cislo}{p['zadani']}", "1.1rem", barva=barva)
             st.text_input("odpověď", key=f"cj_{tid}_{i}", label_visibility="collapsed")
         elif p["typ"] == "kat":
-            st.markdown(f"**{i + 1}.** {p['veta']}", unsafe_allow_html=True)
+            veta_html = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", p["veta"])
+            velky_text(f"{cislo}{veta_html}", "1.1rem", barva=barva)
             st.caption(f"Urči u slova „{p['slovo']}“:")
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -297,6 +349,7 @@ def spust_cestinu():
 
     if st.button("✅ Zkontrolovat", type="primary", key=f"cj_check_{tid}"):
         test["zkontrolovano"] = True
+        st.rerun()
     if not test.get("zkontrolovano"):
         return
 

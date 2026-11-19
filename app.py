@@ -10,13 +10,6 @@ import cestina
 st.set_page_config(page_title="Škola hrou", page_icon="🎒", layout="centered")
 
 
-def _oznac_vse(keys, zdroj):
-    # Nastaví všem písmenům ve skupině stejnou hodnotu jako "Označit vše"
-    hodnota = st.session_state[zdroj]
-    for k in keys:
-        st.session_state[k] = hodnota
-
-
 CERVENA = "#ff4b4b"  # barva pro špatně vyřešené zadání
 
 
@@ -170,31 +163,28 @@ def spust_matematiku(profil, moduly):
         whatsapp_odkazy(profil, test["modul_nazev"], skore, pocet, chyby)
 
 
+def _vyber_pismen(nadpis, pismena, key):
+    # Výběr písmen přes klikací pilulky (zalamují se v pořadí na PC i mobilu).
+    with st.expander(nadpis, expanded=True):
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Označit vše", key=f"{key}_all", use_container_width=True):
+                st.session_state[key] = list(pismena)
+                st.rerun()
+        with c2:
+            if st.button("Zrušit", key=f"{key}_clear", use_container_width=True):
+                st.session_state[key] = []
+                st.rerun()
+        vybrane = st.pills(nadpis, pismena, selection_mode="multi",
+                           format_func=str.upper, key=key, label_visibility="collapsed")
+    return vybrane or []
+
+
 def spust_cteni():
-    st.caption("Rodič: zaškrtni písmena, která už Nela zná. Appka složí slabiky a slova jen z nich.")
+    st.caption("Rodič: označ písmena, která už Nela zná. Appka složí slabiky a slova jen z nich.")
 
-    sam_keys = [f"cteni_sam_{p}" for p in cteni.SAMOHLASKY]
-    souh_keys = [f"cteni_souh_{p}" for p in cteni.SOUHLASKY]
-
-    vybrane_samohlasky = []
-    with st.expander("🔵 Samohlásky", expanded=True):
-        st.checkbox("Označit vše", key="cteni_sam_all",
-                    on_change=_oznac_vse, args=(sam_keys, "cteni_sam_all"))
-        cols = st.columns(7)
-        for idx, p in enumerate(cteni.SAMOHLASKY):
-            with cols[idx % 7]:
-                if st.checkbox(p.upper(), key=f"cteni_sam_{p}"):
-                    vybrane_samohlasky.append(p)
-
-    vybrane_souhlasky = []
-    with st.expander("🟢 Souhlásky", expanded=True):
-        st.checkbox("Označit vše", key="cteni_souh_all",
-                    on_change=_oznac_vse, args=(souh_keys, "cteni_souh_all"))
-        cols = st.columns(7)
-        for idx, p in enumerate(cteni.SOUHLASKY):
-            with cols[idx % 7]:
-                if st.checkbox(p.upper(), key=f"cteni_souh_{p}"):
-                    vybrane_souhlasky.append(p)
+    vybrane_samohlasky = _vyber_pismen("🔵 Samohlásky", cteni.SAMOHLASKY, "cteni_sam")
+    vybrane_souhlasky = _vyber_pismen("🟢 Souhlásky", cteni.SOUHLASKY, "cteni_souh")
 
     rezim = st.radio("Co trénujeme?", ["Slabiky", "Slova"], horizontal=True, key="cteni_rezim")
     pocet = st.slider("Kolik jich ukázat?", min_value=3, max_value=24, value=9, key="cteni_pocet")

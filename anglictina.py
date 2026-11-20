@@ -69,6 +69,34 @@ SLOVESA = [
 
 
 # ============================================================
+# 2b) There is / There are — klad, zápor i otázky
+#     Vždy celá sada možností (ať to nenapovídá).
+# ============================================================
+THERE_MOZNOSTI = ["is", "are", "isn't", "aren't"]
+
+THERE = [
+    # kladné věty
+    {"veta": "There ___ a cat on the sofa.", "spravne": "is", "cesky": "Na pohovce je kočka."},
+    {"veta": "There ___ two books on the table.", "spravne": "are", "cesky": "Na stole jsou dvě knihy."},
+    {"veta": "There ___ a big tree in the garden.", "spravne": "is", "cesky": "Na zahradě je velký strom."},
+    {"veta": "There ___ five apples in the basket.", "spravne": "are", "cesky": "V košíku je pět jablek."},
+    {"veta": "There ___ a dog in the house.", "spravne": "is", "cesky": "V domě je pes."},
+    {"veta": "There ___ many stars in the sky.", "spravne": "are", "cesky": "Na obloze je mnoho hvězd."},
+    # záporné věty
+    {"veta": "There ___ any milk in the fridge.", "spravne": "isn't", "cesky": "V lednici není mléko."},
+    {"veta": "There ___ any children in the park.", "spravne": "aren't", "cesky": "V parku nejsou žádné děti."},
+    {"veta": "There ___ a window in this room.", "spravne": "isn't", "cesky": "V tomhle pokoji není okno."},
+    {"veta": "There ___ any chairs here.", "spravne": "aren't", "cesky": "Tady nejsou žádné židle."},
+    {"veta": "There ___ a problem.", "spravne": "isn't", "cesky": "Není žádný problém."},
+    # otázky
+    {"veta": "___ there a book on the table?", "spravne": "is", "cesky": "Je na stole kniha?"},
+    {"veta": "___ there any apples in the bag?", "spravne": "are", "cesky": "Jsou v tašce jablka?"},
+    {"veta": "___ there a bathroom here?", "spravne": "is", "cesky": "Je tady koupelna?"},
+    {"veta": "___ there two beds in the room?", "spravne": "are", "cesky": "Jsou v pokoji dvě postele?"},
+]
+
+
+# ============================================================
 # 3) Slovíčka — podle oblastí
 #    Každé slovo: en (seznam přijatelných anglických tvarů),
 #    vysl (výslovnost česky), cz (seznam přijatelných českých překladů).
@@ -139,6 +167,21 @@ SLOVICKA = {
         {"en": ["baby"], "vysl": "[bejbi]", "cz": ["miminko", "mimino", "dítě"]},
         {"en": ["family"], "vysl": "[femili]", "cz": ["rodina"]},
     ],
+    "Barvy": [
+        {"en": ["red"], "vysl": "[red]", "cz": ["červená"]},
+        {"en": ["blue"], "vysl": "[blú]", "cz": ["modrá"]},
+        {"en": ["green"], "vysl": "[grín]", "cz": ["zelená"]},
+        {"en": ["yellow"], "vysl": "[jelou]", "cz": ["žlutá"]},
+        {"en": ["orange"], "vysl": "[orindž]", "cz": ["oranžová"]},
+        {"en": ["purple"], "vysl": "[pérpl]", "cz": ["fialová"]},
+        {"en": ["pink"], "vysl": "[pink]", "cz": ["růžová"]},
+        {"en": ["brown"], "vysl": "[braun]", "cz": ["hnědá"]},
+        {"en": ["black"], "vysl": "[blek]", "cz": ["černá"]},
+        {"en": ["white"], "vysl": "[vajt]", "cz": ["bílá"]},
+        {"en": ["grey", "gray"], "vysl": "[grej]", "cz": ["šedá", "šedivá"]},
+        {"en": ["gold"], "vysl": "[gould]", "cz": ["zlatá"]},
+        {"en": ["silver"], "vysl": "[silvr]", "cz": ["stříbrná"]},
+    ],
 }
 
 
@@ -146,12 +189,18 @@ SLOVICKA = {
 # Generátory a pomocné funkce
 # ============================================================
 
+_SKUPINY = {
+    "wh": (WH, WH_MOZNOSTI),
+    "slovesa": (SLOVESA, SLOVESA_MOZNOSTI),
+    "there": (THERE, THERE_MOZNOSTI),
+}
+
+
 def dopln_vygeneruj(skupina, pocet):
-    zdroj = WH if skupina == "wh" else SLOVESA
+    zdroj, moznosti = _SKUPINY[skupina]
     zasoba = zdroj[:]
     random.shuffle(zasoba)
     vyber = zasoba[:pocet] if pocet <= len(zasoba) else [random.choice(zdroj) for _ in range(pocet)]
-    moznosti = WH_MOZNOSTI if skupina == "wh" else SLOVESA_MOZNOSTI
     polozky = []
     for p in vyber:
         polozky.append({

@@ -6,6 +6,7 @@ import streamlit as st
 import matematika
 import cteni
 import cestina
+import anglictina
 
 st.set_page_config(page_title="Škola hrou", page_icon="🎒", layout="centered")
 
@@ -425,6 +426,153 @@ def spust_cestinu():
     whatsapp_odkazy("Sára", test["sub_nazev"], ziskano, maximum, chyby)
 
 
+# ===================== ANGLIČTINA =====================
+
+def _aj_dopln(skupina, nazev):
+    # Doplňovací cvičení s pilulkami (WH otázky i slovesa)
+    pocet = st.slider("Počet vět", min_value=1, max_value=20, value=8, key=f"aj_{skupina}_pocet")
+    if st.button("🎲 Vygenerovat", type="primary", key=f"aj_{skupina}_gen"):
+        tid = st.session_state.get(f"aj_{skupina}_tid", 0) + 1
+        st.session_state[f"aj_{skupina}_tid"] = tid
+        st.session_state[f"aj_{skupina}_test"] = {
+            "polozky": anglictina.dopln_vygeneruj(skupina, pocet), "tid": tid, "zkont": False,
+        }
+
+    test = st.session_state.get(f"aj_{skupina}_test")
+    if not test:
+        return
+    tid = test["tid"]
+    st.write("---")
+    zkont = test.get("zkont")
+
+    for i, p in enumerate(test["polozky"]):
+        moje = st.session_state.get(f"aj_{skupina}_{tid}_{i}")
+        barva = CERVENA if (zkont and moje != p["spravne"]) else None
+        velky_text(p["veta"].replace("___", "_____"), "1.4rem", barva=barva)
+        st.caption(p["cesky"])
+        st.pills("odpoved", p["moznosti"], selection_mode="single",
+                 key=f"aj_{skupina}_{tid}_{i}", label_visibility="collapsed")
+        st.write("")
+
+    if st.button("✅ Zkontrolovat", type="primary", key=f"aj_{skupina}_check_{tid}"):
+        test["zkont"] = True
+        st.rerun()
+    if not test.get("zkont"):
+        return
+
+    st.write("---")
+    skore = 0
+    chyby = []
+    for i, p in enumerate(test["polozky"]):
+        moje = st.session_state.get(f"aj_{skupina}_{tid}_{i}")
+        zadani = p["veta"].replace("___", "_____")
+        if moje == p["spravne"]:
+            skore += 1
+            st.markdown(f"✅ {zadani}  →  **{p['spravne']}**")
+        else:
+            st.markdown(f"❌ {zadani}  →  tvoje: {moje or '—'} · správně: **{p['spravne']}**")
+            chyby.append((zadani, moje or "—", p["spravne"]))
+
+    pocet = len(test["polozky"])
+    st.write("---")
+    velky_text(f"Skóre: {skore} / {pocet}", "1.6rem")
+    if skore == pocet:
+        st.balloons()
+        st.success("🎉 Všechno správně! Výborně!")
+    st.write("---")
+    whatsapp_odkazy("Sára", f"Angličtina – {nazev}", skore, pocet, chyby)
+
+
+def _aj_slovicka():
+    rezim = st.radio("Co chceš dělat?", ["Prohlížet slovíčka", "Test"],
+                     horizontal=True, key="aj_voc_rezim")
+    sekce = st.multiselect("Oblasti slovíček", anglictina.slovicka_sekce(),
+                           default=anglictina.slovicka_sekce(), key="aj_voc_sekce")
+    if not sekce:
+        st.warning("Vyber aspoň jednu oblast.")
+        return
+
+    if rezim == "Prohlížet slovíčka":
+        for s in sekce:
+            st.subheader(s)
+            radky = [{"Anglicky": w["en"][0], "Výslovnost": w["vysl"], "Česky": " / ".join(w["cz"])}
+                     for w in anglictina.SLOVICKA[s]]
+            st.table(radky)
+        return
+
+    # --- Test ---
+    smer_label = st.radio("Varianta testu", ["Česky → anglicky", "Anglicky → česky"], key="aj_voc_smer")
+    smer = "cz2en" if smer_label.startswith("Česky") else "en2cz"
+    pocet = st.slider("Počet slovíček", min_value=1, max_value=30, value=10, key="aj_voc_pocet")
+
+    if st.button("🎲 Vygenerovat", type="primary", key="aj_voc_gen"):
+        tid = st.session_state.get("aj_voc_tid", 0) + 1
+        st.session_state["aj_voc_tid"] = tid
+        st.session_state["aj_voc_test"] = {
+            "polozky": anglictina.slovicka_test_vygeneruj(sekce, smer, pocet),
+            "tid": tid, "zkont": False, "smer": smer,
+        }
+
+    test = st.session_state.get("aj_voc_test")
+    if not test:
+        return
+    tid = test["tid"]
+    smer = test["smer"]
+    napoveda = "napiš anglicky" if smer == "cz2en" else "napiš česky"
+    st.write("---")
+    zkont = test.get("zkont")
+
+    for i, p in enumerate(test["polozky"]):
+        moje = st.session_state.get(f"aj_voc_{tid}_{i}", "")
+        barva = CERVENA if (zkont and not anglictina.voc_ok(moje, p["spravne"], smer)) else None
+        velky_text(p["otazka"], "1.6rem", barva=barva)
+        st.text_input(napoveda, key=f"aj_voc_{tid}_{i}", label_visibility="collapsed",
+                      placeholder=napoveda)
+        st.write("")
+
+    if st.button("✅ Zkontrolovat", type="primary", key=f"aj_voc_check_{tid}"):
+        test["zkont"] = True
+        st.rerun()
+    if not test.get("zkont"):
+        return
+
+    st.write("---")
+    skore = 0
+    chyby = []
+    for i, p in enumerate(test["polozky"]):
+        moje = st.session_state.get(f"aj_voc_{tid}_{i}", "")
+        spravne_str = " / ".join(p["spravne"])
+        if anglictina.voc_ok(moje, p["spravne"], smer):
+            skore += 1
+            st.markdown(f"✅ {p['otazka']}  →  **{spravne_str}**")
+        else:
+            st.markdown(f"❌ {p['otazka']}  →  tvoje: {moje or '—'} · správně: **{spravne_str}**")
+            chyby.append((p["otazka"], moje or "—", spravne_str))
+
+    pocet = len(test["polozky"])
+    st.write("---")
+    velky_text(f"Skóre: {skore} / {pocet}", "1.6rem")
+    if skore == pocet:
+        st.balloons()
+        st.success("🎉 Všechno správně! Výborně!")
+    st.write("---")
+    whatsapp_odkazy("Sára", "Angličtina – slovíčka", skore, pocet, chyby)
+
+
+def spust_anglictinu():
+    oblast = st.selectbox(
+        "Vyber oblast",
+        ["Tázací slova (WH)", "Slovesa (to be / have got / can)", "Slovíčka"],
+        key="aj_oblast",
+    )
+    if oblast.startswith("Tázací"):
+        _aj_dopln("wh", "tázací slova")
+    elif oblast.startswith("Slovesa"):
+        _aj_dopln("slovesa", "slovesa")
+    else:
+        _aj_slovicka()
+
+
 # --- UI ---
 st.sidebar.title("🎒 Škola hrou")
 profil = st.sidebar.radio("Kdo cvičí?", ["Nela (1. třída)", "Sára (4. třída)"])
@@ -438,8 +586,10 @@ if profil.startswith("Nela"):
         spust_cteni()
 else:
     st.title("🌈 Sára — 4. třída")
-    tab_mat, tab_cj = st.tabs(["🔢 Matematika", "✏️ Český jazyk"])
+    tab_mat, tab_cj, tab_aj = st.tabs(["🔢 Matematika", "✏️ Český jazyk", "🇬🇧 Angličtina"])
     with tab_mat:
         spust_matematiku("Sára", matematika.SARA_MODULY)
     with tab_cj:
         spust_cestinu()
+    with tab_aj:
+        spust_anglictinu()

@@ -586,7 +586,7 @@ if profil.startswith("Nela"):
         spust_cteni()
 else:
     st.title("🌈 Sára — 4. třída")
-    tab_mat, tab_cj, tab_aj = st.tabs(["🔢 Matematika", "✏️ Český jazyk", "🇬🇧 Angličtina"])
+    tab_mat, tab_cj, tab_aj = st.tabs(["🔢 Matematika", "✏️ Český jazyk", "🌍 Angličtina"])
     with tab_mat:
         spust_matematiku("Sára", matematika.SARA_MODULY)
     with tab_cj:

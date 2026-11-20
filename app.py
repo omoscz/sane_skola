@@ -562,13 +562,16 @@ def _aj_slovicka():
 def spust_anglictinu():
     oblast = st.selectbox(
         "Vyber oblast",
-        ["Tázací slova (WH)", "Slovesa (to be / have got / can)", "Slovíčka"],
+        ["Tázací slova (WH)", "Slovesa (to be / have got / can)",
+         "There is / There are", "Slovíčka"],
         key="aj_oblast",
     )
     if oblast.startswith("Tázací"):
         _aj_dopln("wh", "tázací slova")
     elif oblast.startswith("Slovesa"):
         _aj_dopln("slovesa", "slovesa")
+    elif oblast.startswith("There"):
+        _aj_dopln("there", "there is / there are")
     else:
         _aj_slovicka()
 

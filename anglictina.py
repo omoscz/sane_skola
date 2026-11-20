@@ -38,6 +38,9 @@ _BE = ["am", "is", "are"]
 _HAVE = ["have", "has"]
 _CAN = ["can", "can't"]
 
+# Při testu se u sloves nabízí vždy celá sada možností (ať to nenapovídá).
+SLOVESA_MOZNOSTI = ["am", "is", "are", "have", "has", "can", "can't"]
+
 SLOVESA = [
     # to be
     {"veta": "I ___ happy.", "moznosti": _BE, "spravne": "am", "cesky": "Jsem šťastný(á)."},
@@ -148,12 +151,13 @@ def dopln_vygeneruj(skupina, pocet):
     zasoba = zdroj[:]
     random.shuffle(zasoba)
     vyber = zasoba[:pocet] if pocet <= len(zasoba) else [random.choice(zdroj) for _ in range(pocet)]
+    moznosti = WH_MOZNOSTI if skupina == "wh" else SLOVESA_MOZNOSTI
     polozky = []
     for p in vyber:
         polozky.append({
             "typ": "dopln",
             "veta": p["veta"],
-            "moznosti": p.get("moznosti", WH_MOZNOSTI),
+            "moznosti": moznosti,
             "spravne": p["spravne"],
             "cesky": p["cesky"],
         })

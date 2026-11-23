@@ -182,6 +182,23 @@ SLOVICKA = {
         {"en": ["gold"], "vysl": "[gould]", "cz": ["zlatá"]},
         {"en": ["silver"], "vysl": "[silvr]", "cz": ["stříbrná"]},
     ],
+    "Povaha a vzhled": [
+        {"en": ["clever"], "vysl": "[klevr]", "cz": ["chytrý", "bystrý"]},
+        {"en": ["selfish"], "vysl": "[selfiš]", "cz": ["sobecký"]},
+        {"en": ["naughty"], "vysl": "[nóty]", "cz": ["zlobivý", "nezbedný"]},
+        {"en": ["stupid"], "vysl": "[stjúpid]", "cz": ["hloupý", "blbý"]},
+        {"en": ["quiet"], "vysl": "[kvajet]", "cz": ["tichý"]},
+        {"en": ["beard"], "vysl": "[bírd]", "cz": ["vousy", "vousatý"]},
+        {"en": ["funny"], "vysl": "[fany]", "cz": ["vtipný", "legrační", "srandovní"]},
+        {"en": ["curly"], "vysl": "[kérli]", "cz": ["kudrnatý"]},
+        {"en": ["straight"], "vysl": "[strejt]", "cz": ["rovné (vlasy)", "rovné", "rovné vlasy", "rovný"]},
+        {"en": ["fair"], "vysl": "[fér]", "cz": ["světlovlasý", "blond", "blonďatý", "spravedlivý"]},
+        {"en": ["nice"], "vysl": "[najs]", "cz": ["hodný", "milý"]},
+        {"en": ["friendly"], "vysl": "[frendli]", "cz": ["přátelský"]},
+        {"en": ["kind"], "vysl": "[kajnd]", "cz": ["laskavý", "hodný", "milý"]},
+        {"en": ["honest"], "vysl": "[onist]", "cz": ["upřímný", "čestný", "poctivý"]},
+        {"en": ["lazy"], "vysl": "[lejzi]", "cz": ["líný"]},
+    ],
 }
 
 

@@ -75,9 +75,8 @@ def vygeneruj_slabiky(pocet, samohlasky, souhlasky):
     vse = _slabiky_vse(samohlasky, souhlasky)
     if not vse:
         return []
-    if pocet <= len(vse):
-        return random.sample(vse, pocet)
-    return [random.choice(vse) for _ in range(pocet)]
+    # bez opakování; když je možných míň než pocet, vrátíme jen tolik, kolik jde
+    return random.sample(vse, min(pocet, len(vse)))
 
 
 def slova_pro_pismena(pismena):
@@ -102,6 +101,5 @@ def vygeneruj_slova(pocet, pismena):
     dostupna = slova_pro_pismena(pismena)
     if not dostupna:
         return []
-    if pocet <= len(dostupna):
-        return random.sample(dostupna, pocet)
-    return [random.choice(dostupna) for _ in range(pocet)]
+    # bez opakování; když je dostupných míň než pocet, vrátíme jen tolik, kolik jde
+    return random.sample(dostupna, min(pocet, len(dostupna)))

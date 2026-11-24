@@ -483,6 +483,28 @@ def _aj_dopln(skupina, nazev):
     whatsapp_odkazy("Sára", f"Angličtina – {nazev}", skore, pocet, chyby)
 
 
+def _tabulka_slovicek(words):
+    # HTML tabulka: slova se nezalamují (white-space:nowrap), na mobilu se dá
+    # posouvat doprava (overflow-x:auto). Pořadí sloupců: Anglicky, Česky, Výslovnost.
+    bunka = "padding:5px 16px 5px 0;white-space:nowrap;border-bottom:1px solid rgba(128,128,128,0.2)"
+    html = ['<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">',
+            '<table style="border-collapse:collapse">',
+            f'<tr>'
+            f'<th style="text-align:left;{bunka};font-weight:700">Anglicky</th>'
+            f'<th style="text-align:left;{bunka};font-weight:700">Česky</th>'
+            f'<th style="text-align:left;{bunka};font-weight:700">Výslovnost</th>'
+            f'</tr>']
+    for w in words:
+        html.append(
+            '<tr>'
+            f'<td style="{bunka};font-weight:600">{w["en"][0]}</td>'
+            f'<td style="{bunka}">{" / ".join(w["cz"])}</td>'
+            f'<td style="{bunka};opacity:0.75">{w["vysl"]}</td>'
+            '</tr>')
+    html.append('</table></div>')
+    st.markdown("".join(html), unsafe_allow_html=True)
+
+
 def _aj_slovicka():
     rezim = st.radio("Co chceš dělat?", ["Prohlížet slovíčka", "Test"],
                      horizontal=True, key="aj_voc_rezim")
@@ -495,9 +517,7 @@ def _aj_slovicka():
     if rezim == "Prohlížet slovíčka":
         for s in sekce:
             st.subheader(s)
-            radky = [{"Anglicky": w["en"][0], "Výslovnost": w["vysl"], "Česky": " / ".join(w["cz"])}
-                     for w in anglictina.SLOVICKA[s]]
-            st.table(radky)
+            _tabulka_slovicek(anglictina.SLOVICKA[s])
         return
 
     # --- Test ---

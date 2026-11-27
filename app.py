@@ -263,7 +263,7 @@ def spust_cestinu():
         skupiny = st.multiselect("Skupiny (podle písmene)", cestina.DIKTATY_SKUPINY,
                                  default=cestina.DIKTATY_SKUPINY, key="cj_skupiny")
 
-    pocet_label = "Počet vět" if sub == "diktat" else "Počet příkladů"
+    pocet_label = "Počet vět" if sub in ("diktat", "velka") else "Počet příkladů"
     pocet = st.slider(pocet_label, min_value=1, max_value=20, value=8, key="cj_pocet")
 
     if st.button("🎲 Vygenerovat", type="primary", key="cj_gen"):
@@ -274,6 +274,8 @@ def spust_cestinu():
             st.session_state["cj_testid"] = tid
             if sub == "diktat":
                 pol = cestina.diktat_vygeneruj(skupiny, pocet)
+            elif sub == "velka":
+                pol = cestina.velka_vygeneruj(pocet)
             elif sub == "pady":
                 pol = cestina.pady_vygeneruj(pocet)
             elif sub == "kat":
@@ -302,7 +304,9 @@ def spust_cestinu():
             cols = st.columns(pocet_mezer)
             for j in range(pocet_mezer):
                 with cols[j]:
-                    st.radio(f"mezera {j + 1}", ["i", "í", "y", "ý"], index=None,
+                    # Diktát nabízí i/í/y/ý; cvičení na velká/malá písmena má vlastní dvojici.
+                    st.radio(f"mezera {j + 1}", p.get("moznosti", [["i", "í", "y", "ý"]] * pocet_mezer)[j],
+                             index=None, horizontal="moznosti" in p,
                              key=f"cj_{tid}_{i}_b{j}", label_visibility="collapsed")
         elif p["typ"] == "pad":
             velky_text(f"{cislo}{p['zadani']}", "1.1rem", barva=barva)

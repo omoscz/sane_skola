@@ -1,5 +1,6 @@
 # cestina.py — lokální databáze cvičení z češtiny pro 4. třídu (bez AI)
 import random
+import re
 
 # ============================================================
 # 1) DIKTÁT — věty s vyjmenovanými slovy, doplň i/í/y/ý
@@ -382,6 +383,69 @@ DRUHY = [
 
 
 # ============================================================
+# 6) VELKÁ A MALÁ PÍSMENA — doplň u označeného slova velké / malé písmeno
+#    Slovo ve složených závorkách {} = tomu slovu chybí první písmeno.
+#    Velké: jména osob, zvířat, města, státy, kontinenty, řeky, hory, svátky,
+#           obyvatelé (Čech, Moravan).
+#    Malé:  přídavná jména (moravská, pražský), jazyky (česky), dny, měsíce,
+#           roční období, obecná jména (hora, řeka, pan).
+# ============================================================
+VELKA_MALA = [
+    "Kamarádka {Eva} bydlí v {Brně} a mluví {česky}.",
+    "Táta jede v {pondělí} do {Prahy}.",
+    "Na výletě jsme potkali {moravskou} dívku z {Olomouce}.",
+    "Přes {Vltavu} vede starý {pražský} most.",
+    "Honza je {Čech} a mluví {česky}.",
+    "Naše třída pojede v {květnu} do {Německa}.",
+    "Náš pes {Punta} spal celou {sobotu}.",
+    "Naše země leží v {Evropě} a je to {evropský} stát.",
+    "Žirafy žijí v {Africe} a jsou to {africká} zvířata.",
+    "Klokani skáčou v {Austrálii} a jsou to {australská} zvířata.",
+    "Letadlem jsme letěli z {Asie} do {Ameriky} v {létě}.",
+    "O {Vánocích} jsme jeli k babičce do {Zlína}.",
+    "Na {Velikonoce} pečeme {velikonoční} beránka.",
+    "Včera jsme potkali {pana} {Nováka} z {Plzně}.",
+    "Sestra {Anička} jede o {prázdninách} k moři.",
+    "Nejvyšší {hora} {Česka} se jmenuje {Sněžka}.",
+    "Do {Itálie} jsme jeli na {italské} moře.",
+    "Moje teta žije ve {Francii} a mluví {francouzsky}.",
+    "V {zimě} jezdíme na hory do {Rakouska}.",
+    "Kamarád {Tomáš} je {Polák} a mluví {polsky}.",
+    "Dnes je {středa} a {Petr} má v {Ostravě} kroužek.",
+    "Největší {řeka} v {Česku} je {Vltava}.",
+    "Na {Moravě} se peče výborný {moravský} koláč.",
+    "Pavel je {Moravan} a rád poslouchá {moravské} písničky.",
+    "Řeka {Dunaj} teče {evropskými} zeměmi.",
+    "V {únoru} jsme jeli na hory do {Jeseníků}.",
+    "Kočka {Micka} chytila myš na zahradě u {Liberce}.",
+    "Do {Brna} jede červená {brněnská} tramvaj.",
+    "Karel a {Klára} jedou v {neděli} do {Prahy}.",
+    "V {Anglii} mluví lidé {anglicky}.",
+    "Ve {čtvrtek} jede vlak z {Brna} do {Prahy}.",
+    "Naše sousedka {Karolína} má {německého} ovčáka jménem {Rex}.",
+    "Ve {Španělsku} se mluví {španělsky}.",
+    "Letos o {prázdninách} pojedeme do {Chorvatska}.",
+    "Přes {Atlantik} pluje {americká} loď.",
+    "Na {Slovensku} jsou {slovenské} hory {Tatry}.",
+    "Moje maminka je {Slovenka} a mluví i {slovensky}.",
+    "Hlavní {město} {Francie} je {Paříž}.",
+    "S {Hurvínkem} a {panem} {Spejblem} jsme byli v divadle.",
+    "Maminka {Lenka} se narodila v {Olomouci} a je to {olomoucká} rodačka.",
+    "Naše babička je {Češka} a peče výborný {český} koláč.",
+    "Na jaře kvete v {Praze} spousta {pražských} stromů.",
+    "Sestřenice {Lucie} bydlí v {Plzni} a chodí na {plzeňské} gymnázium.",
+    "Kůň {Ferda} běhá po louce u {Jihlavy}.",
+    "V {říjnu} jsme poslali pohlednici z {Itálie}.",
+    "Strýc {Martin} je {Němec} a mluví {německy}.",
+    "Pod horou {Radhošť} stojí {valašská} chaloupka.",
+    "V {sobotu} jedeme na {polský} trh do {Krakova}.",
+    "Pan {učitel} {Dvořák} nám vyprávěl o {Africe}.",
+    "Ve {Vídni} je {rakouské} hlavní město.",
+    "Děda {Josef} je {Slezan} a bydlí v {Opavě}.",
+]
+
+
+# ============================================================
 # Generátory
 # ============================================================
 
@@ -413,6 +477,37 @@ def diktat_vygeneruj(skupiny, pocet):
     for veta, odp in vybrane:
         polozky.append({"typ": "diktat", "text": veta, "odp": odp, "plny": _vypln(veta, odp)})
     return polozky
+
+
+def _rozloz_velka_mala(veta: str) -> dict:
+    """Rozloží větu se slovy ve {} na zadání s mezerami, správná písmena a možnosti.
+
+    Slovu v {} chybí první písmeno: "{Praha}" -> "_raha", správně "P", na výběr "P" / "p".
+    Vrací slovník ve stejném tvaru jako položka diktátu (plus klíč "moznosti").
+    """
+    odp: list = []
+    moznosti: list = []
+
+    def _nahrad(shoda: re.Match) -> str:
+        slovo = shoda.group(1)
+        odp.append(slovo[0])
+        moznosti.append([slovo[0].upper(), slovo[0].lower()])
+        return "_" + slovo[1:]
+
+    text = re.sub(r"\{([^}]+)\}", _nahrad, veta)
+    return {"typ": "diktat", "text": text, "odp": odp, "moznosti": moznosti,
+            "plny": _vypln(text, odp)}
+
+
+def velka_vygeneruj(pocet: int) -> list:
+    """Vybere náhodné věty pro cvičení na velká a malá písmena (bez opakování, pokud to jde)."""
+    zasoba = VELKA_MALA[:]
+    random.shuffle(zasoba)
+    if pocet <= len(zasoba):
+        vyber = zasoba[:pocet]
+    else:
+        vyber = [random.choice(VELKA_MALA) for _ in range(pocet)]
+    return [_rozloz_velka_mala(v) for v in vyber]
 
 
 def pady_vygeneruj(pocet):
@@ -472,6 +567,7 @@ def druhy_vygeneruj(pocet):
 
 SUBMODULY = {
     "Diktát (vyjmenovaná slova)": "diktat",
+    "Velká a malá písmena": "velka",
     "Pády": "pady",
     "Mluvnické kategorie": "kat",
     "Stavba slova": "stavba",

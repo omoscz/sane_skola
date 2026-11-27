@@ -164,8 +164,8 @@ def spust_matematiku(profil, moduly):
         whatsapp_odkazy(profil, test["modul_nazev"], skore, pocet, chyby)
 
 
-def _vyber_pismen(nadpis, pismena, key):
-    # Výběr písmen přes klikací pilulky (zalamují se v pořadí na PC i mobilu).
+def _vyber_pismen(nadpis, pismena, key, format_func=str.upper):
+    # Výběr přes klikací pilulky (zalamují se v pořadí na PC i mobilu).
     with st.expander(nadpis, expanded=True):
         c1, c2 = st.columns(2)
         with c1:
@@ -177,7 +177,7 @@ def _vyber_pismen(nadpis, pismena, key):
                 st.session_state[key] = []
                 st.rerun()
         vybrane = st.pills(nadpis, pismena, selection_mode="multi",
-                           format_func=str.upper, key=key, label_visibility="collapsed")
+                           format_func=format_func, key=key, label_visibility="collapsed")
     return vybrane or []
 
 
@@ -508,10 +508,11 @@ def _tabulka_slovicek(words):
 def _aj_slovicka():
     rezim = st.radio("Co chceš dělat?", ["Prohlížet slovíčka", "Test"],
                      horizontal=True, key="aj_voc_rezim")
-    sekce = st.multiselect("Oblasti slovíček", anglictina.slovicka_sekce(),
-                           default=anglictina.slovicka_sekce(), key="aj_voc_sekce")
+    # Výchozí stav: nic není vybráno, sekce se zapínají kliknutím na tlačítka.
+    sekce = _vyber_pismen("Oblasti slovíček", anglictina.slovicka_sekce(),
+                          "aj_voc_sekce", format_func=str)
     if not sekce:
-        st.warning("Vyber aspoň jednu oblast.")
+        st.info("Vyber aspoň jednu oblast.")
         return
 
     if rezim == "Prohlížet slovíčka":

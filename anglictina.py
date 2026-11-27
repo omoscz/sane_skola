@@ -166,6 +166,12 @@ SLOVICKA = {
         {"en": ["cousin"], "vysl": "[kazn]", "cz": ["bratranec", "sestřenice"]},
         {"en": ["baby"], "vysl": "[bejbi]", "cz": ["miminko", "mimino", "dítě"]},
         {"en": ["family"], "vysl": "[femili]", "cz": ["rodina"]},
+        {"en": ["niece"], "vysl": "[nís]", "cz": ["neteř"]},
+        {"en": ["nephew"], "vysl": "[nefjú]", "cz": ["synovec"]},
+        {"en": ["husband"], "vysl": "[hazbend]", "cz": ["manžel"]},
+        {"en": ["wife"], "vysl": "[vajf]", "cz": ["manželka"]},
+        {"en": ["twins"], "vysl": "[tvinz]", "cz": ["dvojčata"]},
+        {"en": ["siblings"], "vysl": "[siblingz]", "cz": ["sourozenci"]},
     ],
     "Barvy": [
         {"en": ["red"], "vysl": "[red]", "cz": ["červená"]},

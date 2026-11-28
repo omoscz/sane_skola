@@ -240,6 +240,23 @@ def slovicka_sekce():
     return list(SLOVICKA.keys())
 
 
+def _vsechna_en_pro_cz(cz_slovo: str) -> list:
+    """Vrátí všechna anglická slova, která se k českému slovu hodí (napříč všemi slovníčky).
+
+    Díky tomu se u „babička“ uzná grandmother i grandma/granny, u „hodný“ nice i kind,
+    ale u „laskavý“ jen kind (to je jen u kind).
+    """
+    hledane = _norm_cz(cz_slovo)
+    vysledek: list = []
+    for polozky in SLOVICKA.values():
+        for w in polozky:
+            if hledane in {_norm_cz(c) for c in w["cz"]}:
+                for en in w["en"]:
+                    if en not in vysledek:
+                        vysledek.append(en)
+    return vysledek
+
+
 def slovicka_test_vygeneruj(sekce_list, smer, pocet):
     zasoba = []
     for s in sekce_list:
@@ -251,7 +268,8 @@ def slovicka_test_vygeneruj(sekce_list, smer, pocet):
     polozky = []
     for w in vyber:
         if smer == "cz2en":
-            polozky.append({"typ": "voc", "otazka": w["cz"][0], "spravne": w["en"],
+            polozky.append({"typ": "voc", "otazka": w["cz"][0],
+                            "spravne": _vsechna_en_pro_cz(w["cz"][0]),
                             "smer": smer, "vysl": w["vysl"]})
         else:
             polozky.append({"typ": "voc", "otazka": w["en"][0], "spravne": w["cz"],
